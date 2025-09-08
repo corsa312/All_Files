@@ -5,385 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Links dos Arquivos • corsa312/All_Files</title>
   <style>
-    :root {
-      --bg: #0b0c10;
-      --panel: #11131a;
-      --muted: #9aa4b2;
-      --text: #e6e8ec;
-      --brand: #6d5efc;
-      --brand-2: #49d0b0;
-      --stroke: #20222b;
-      --accent: #1a1d27;
-    }
-    html, body { height: 100%; }
-    * { box-sizing: border-box }
     body {
-      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: linear-gradient(180deg, var(--bg), #0e1116 60%);
-      color: var(--text);
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
     }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 64px; }
-    header { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
-    .repo {
-      background: linear-gradient(120deg, var(--panel), #0f1320);
-      border: 1px solid var(--stroke); border-radius: 16px; padding: 16px 18px; flex: 1 1 420px;
-      display:flex; align-items:center; gap:12px; min-width: 280px;
+    h1 {
+      color: #9b59b6;
     }
-    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 24px var(--brand-2); }
-    .repo h1 { margin:0; font-size: 18px; font-weight: 700; }
-    .repo .sub { font-size: 12px; color: var(--muted); margin-top: 4px }
-
-    .controls {
-      display:grid; grid-template-columns: 1fr auto auto; gap: 10px; width: 100%; margin-top: 14px;
+    .file {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      margin: 4px 0;
+      background: #2a2a2a;
+      border-radius: 8px;
     }
-    .controls input[type="text"] {
-      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--stroke);
-      background: var(--accent); color: var(--text);
-      outline: none; box-shadow: inset 0 0 0 1px transparent; transition: box-shadow .2s ease;
+    .file:hover {
+      background: #3a2a4a;
     }
-    .controls input[type="text"]:focus { box-shadow: inset 0 0 0 1px var(--brand); }
-
-    .btn, .toggle {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 12px; border-radius: 12px; border: 1px solid var(--stroke);
-      background: var(--panel); color: var(--text); cursor: pointer; user-select: none;
+    a {
+      color: #c39bd3;
+      text-decoration: none;
+      font-weight: bold;
     }
-    .btn.primary { background: linear-gradient(120deg, var(--brand), #8a7bff); border-color: transparent; font-weight: 700; }
-    .btn:disabled { opacity: .6; cursor: not-allowed }
-
-    .hint { color: var(--muted); font-size: 12px; margin-top: 8px }
-
-    .grid { margin-top: 18px; display:grid; grid-template-columns: 1fr; gap: 12px }
-    .card { background: linear-gradient(180deg, var(--panel), #0f121a); border: 1px solid var(--stroke); border-radius: 16px; overflow: hidden; }
-    .card > .head { display:flex; align-items:center; justify-content: space-between; padding: 14px 16px; gap:12px; cursor: pointer; }
-    .card .title { font-weight: 700; }
-    .chev { transition: transform .2s ease; }
-    .collapsed .chev { transform: rotate(-90deg); }
-
-    .files { padding: 6px 8px 12px; }
-    .file { display:flex; align-items:center; justify-content: space-between; gap:10px; padding: 8px 10px; border-radius: 10px; }
-    .file:hover { background: rgba(255,255,255,0.03) }
-    .file .meta { display:flex; align-items:center; gap: 10px; min-width: 0; }
-    .pill { font-size: 11px; color: var(--muted); border: 1px dashed var(--stroke); padding: 3px 8px; border-radius: 999px }
-    .path { color: #c8d1df; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .actions { display:flex; gap: 8px }
-    .link { text-decoration: none; }
-    .ghost { background: transparent; border: 1px dashed var(--stroke) }
-
-    footer { margin-top: 36px; color: var(--muted); font-size: 12px; display:flex; align-items:center; gap:8px }
-    code.k { background: #0d1016; border: 1px solid var(--stroke); padding: 2px 6px; border-radius: 6px }
-
-    @media (min-width: 840px) {
-      .controls { grid-template-columns: 1fr auto auto auto; }
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="repo">
-        <div class="dot"></div>
-        <div>
-          <h1>corsa312 / All_Files</h1>
-          <div class="sub">Gerador automático de links direto do repositório</div>
-        </div>
-      </div>
-      <button id="refresh" class="btn primary" title="Recarregar do GitHub">🔄 Recarregar</button>
-    </header>
-
-    <div class="controls">
-      <input id="search" type="text" placeholder="Filtrar por nome/extensão (ex.: .png, README, pasta/)" />
-      <label class="toggle"><input id="showDirs" type="checkbox" checked style="accent-color:var(--brand)"> Mostrar pastas</label>
-      <label class="toggle"><input id="rawLinks" type="checkbox" style="accent-color:var(--brand)"> Link direto (raw)</label>
-      <button id="copyAll" class="btn" title="Copiar todos os links filtrados">📋 Copiar links</button>
-    </div>
-    <div class="hint">Dica: use <code class="k">/</code> para filtrar por subpasta (ex.: <code class="k">assets/</code>) e <code class="k">.md</code> para por extensão.</div>
-
-    <section id="list" class="grid" aria-live="polite"></section>
-
-    <footer>
-      <span>Construído com a API pública do GitHub. Sem token.</span>
-      <span>•</span>
-      <span>Se o repositório ficar muito grande, considere usar um token com <em>rate limit</em> maior.</span>
-    </footer>
-  </div>
+  <h1>📂 Links dos Arquivos - corsa312/All_Files</h1>
+  <div id="lista"></div>
 
   <script>
-    const owner = 'corsa312';
-    const repo  = 'All_Files';
+    // 🔧 Edite aqui sua lista de arquivos e pastas:
+    const arquivos = [
+      { path: "README.md", type: "file" },
+      { path: "imagens/", type: "dir" },
+      { path: "imagens/logo.png", type: "file" },
+      { path: "docs/manual.pdf", type: "file" },
+      { path: "src/", type: "dir" },
+      { path: "src/index.html", type: "file" }
+    ];
 
-    const els = {
-      list: document.getElementById('list'),
-      search: document.getElementById('search'),
-      showDirs: document.getElementById('showDirs'),
-      rawLinks: document.getElementById('rawLinks'),
-      copyAll: document.getElementById('copyAll'),
-      refresh: document.getElementById('refresh'),
-    };
+    // Config do seu repositório
+    const owner = "corsa312";
+    const repo  = "All_Files";
+    const branch = "main"; // troque se usar master
 
-    let state = {
-      branch: 'main',
-      tree: [], // full Git tree entries
-      byDir: new Map(), // dirPath -> { files: [], dirs: Set }
-    };
+    const lista = document.getElementById("lista");
 
-    // Helpers
-    const api = (path) => `https://api.github.com${path}`;
-    const delay = (ms) => new Promise(r => setTimeout(r, ms));
-
-    function buildLinks(path) {
-      const encodedPath = path.split('/').map(encodeURIComponent).join('/');
-      const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${state.branch}/${encodedPath}`;
-      const blob = `https://github.com/${owner}/${repo}/blob/${state.branch}/${encodedPath}`;
-      return { raw, blob };
-    }
-
-    function iconFor(path, type) {
-      if (type === 'tree') return '📁';
-      const ext = (path.split('.').pop() || '').toLowerCase();
-      const map = {
-        'md':'📘','txt':'📝','json':'🧾','yml':'🧾','yaml':'🧾','csv':'📊','png':'🖼️','jpg':'🖼️','jpeg':'🖼️','gif':'🖼️','svg':'🖼️','webp':'🖼️','html':'🌐','css':'🎨','js':'🧩','ts':'🧩','py':'🐍','java':'☕','c':'💠','cpp':'💠','cs':'#️⃣','rb':'🔻','php':'🐘','go':'💙','rs':'🦀','pdf':'📄','zip':'🗜️','rar':'🗜️'
-      };
-      return map[ext] || '📄';
-    }
-
-    function buildIndex(entries) {
-      const map = new Map();
-      const ensure = (dir) => {
-        if (!map.has(dir)) map.set(dir, { files: [], dirs: new Set() });
-        return map.get(dir);
-      };
-      for (const e of entries) {
-        const isDir = e.type === 'tree';
-        const parts = e.path.split('/');
-        const dir = parts.slice(0, -1).join('/');
-        const base = parts[parts.length - 1];
-        const bucket = ensure(dir);
-        if (isDir) {
-          bucket.dirs.add(e.path);
-        } else if (e.type === 'blob') {
-          bucket.files.push({ name: base, path: e.path, size: e.size || 0 });
-        }
-      }
-      return map;
-    }
-
-    function render() {
-      const q = els.search.value.trim().toLowerCase();
-      const showDirs = els.showDirs.checked;
-      const useRaw = els.rawLinks.checked;
-      const list = els.list;
-      list.innerHTML = '';
-
-      // Build a sorted list of top-level directories and root files
-      const dirs = new Set();
-      const root = state.byDir.get('') || { files: [], dirs: new Set() };
-      for (const d of (state.byDir.get('')?.dirs || [])) dirs.add(d);
-
-      // also include nested dirs in results when filtered by path
-      const allDirs = [...state.byDir.keys()].filter(Boolean).sort();
-      const allRootFiles = root.files.slice().sort((a,b)=>a.name.localeCompare(b.name));
-
-      const match = (p) => q === '' || p.toLowerCase().includes(q);
-
-      // Render top-level card: Root
-      const rootCard = createCard('📦 Raiz do repositório', '', showDirs);
-      const rootContainer = rootCard.querySelector('.files');
-
-      // Root files
-      for (const f of allRootFiles) {
-        if (!match(f.path)) continue;
-        rootContainer.appendChild(renderFileRow(f, useRaw));
+    arquivos.forEach(item => {
+      let url;
+      if (item.type === "file") {
+        url = `https://github.com/${owner}/${repo}/blob/${branch}/${item.path}`;
+      } else {
+        url = `https://github.com/${owner}/${repo}/tree/${branch}/${item.path}`;
       }
 
-      // Root subfolders
-      if (showDirs) {
-        const sub = [...(state.byDir.get('')?.dirs || [])].sort((a,b)=>a.localeCompare(b));
-        for (const d of sub) {
-          if (!match(d)) continue;
-          rootContainer.appendChild(renderDirRow(d));
-        }
-      }
-
-      if (rootContainer.children.length) list.appendChild(rootCard);
-
-      // Other directories as separate cards when searching or when showDirs
-      const candidates = q ? allDirs.filter(d => match(d)) : [];
-      for (const dirPath of candidates) {
-        const card = createCard(`📁 ${dirPath}`, dirPath, showDirs);
-        const box = card.querySelector('.files');
-        const bucket = state.byDir.get(dirPath) || { files: [], dirs: new Set() };
-        const files = bucket.files.slice().sort((a,b)=>a.name.localeCompare(b.name));
-        for (const f of files) box.appendChild(renderFileRow(f, useRaw));
-        if (showDirs) {
-          for (const d of [...bucket.dirs].sort()) box.appendChild(renderDirRow(d));
-        }
-        if (box.children.length) list.appendChild(card);
-      }
-
-      if (!list.children.length) {
-        const empty = document.createElement('div');
-        empty.className = 'card';
-        empty.innerHTML = `<div class="head"><div class="title">Nenhum resultado</div></div><div class="files"><div class="file"><span class="path">Tente outro filtro ou desmarque opções acima.</span></div></div>`;
-        list.appendChild(empty);
-      }
-    }
-
-    function createCard(title, dirPath, collapsible=true) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="head" role="button" aria-expanded="true">
-          <div class="title">${title}</div>
-          <div class="chev">▾</div>
-        </div>
-        <div class="files"></div>
+      const div = document.createElement("div");
+      div.className = "file";
+      div.innerHTML = `
+        <span>${item.type === "dir" ? "📁" : "📄"} ${item.path}</span>
+        <a href="${url}" target="_blank">Abrir</a>
       `;
-      const head = card.querySelector('.head');
-      head.addEventListener('click', () => {
-        card.classList.toggle('collapsed');
-        const open = !card.classList.contains('collapsed');
-        head.setAttribute('aria-expanded', String(open));
-        card.querySelector('.files').style.display = open ? '' : 'none';
-      });
-      return card;
-    }
-
-    function renderFileRow(f, useRaw) {
-      const { raw, blob } = buildLinks(f.path);
-      const row = document.createElement('div');
-      row.className = 'file';
-      row.innerHTML = `
-        <div class="meta">
-          <span>${iconFor(f.path, 'blob')}</span>
-          <span class="path" title="${f.path}">${f.path}</span>
-          <span class="pill">${formatSize(f.size)}</span>
-        </div>
-        <div class="actions">
-          <a class="btn link" href="${useRaw ? raw : blob}" target="_blank" rel="noopener">Abrir</a>
-          <button class="btn ghost" data-copy="${useRaw ? raw : blob}">Copiar</button>
-        </div>
-      `;
-      row.querySelector('button[data-copy]').addEventListener('click', (e) => {
-        const url = e.currentTarget.getAttribute('data-copy');
-        copyToClipboard(url);
-        e.currentTarget.textContent = 'Copiado!';
-        setTimeout(()=>{ e.currentTarget.textContent = 'Copiar'; }, 1200);
-      });
-      return row;
-    }
-
-    function renderDirRow(dirPath) {
-      const row = document.createElement('div');
-      row.className = 'file';
-      row.innerHTML = `
-        <div class="meta">
-          <span>📁</span>
-          <span class="path" title="${dirPath}">${dirPath}</span>
-          <span class="pill">pasta</span>
-        </div>
-        <div class="actions">
-          <button class="btn" data-open="${dirPath}">Abrir</button>
-        </div>
-      `;
-      row.querySelector('button[data-open]').addEventListener('click', (e) => {
-        const target = e.currentTarget.getAttribute('data-open');
-        els.search.value = target + '/';
-        render();
-      });
-      return row;
-    }
-
-    function formatSize(bytes) {
-      if (!bytes || bytes <= 0) return '—';
-      const units = ['B','KB','MB','GB'];
-      let i = 0; let num = bytes;
-      while (num >= 1024 && i < units.length-1) { num/=1024; i++; }
-      return `${num.toFixed(num < 10 && i>0 ? 1 : 0)} ${units[i]}`;
-    }
-
-    async function copyToClipboard(text) {
-      try { await navigator.clipboard.writeText(text); } catch(e) {
-        const ta = document.createElement('textarea');
-        ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      }
-    }
-
-    async function fetchJSON(url) {
-      const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github+json' }});
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      return res.json();
-    }
-
-    async function resolveDefaultBranch() {
-      const data = await fetchJSON(api(`/repos/${owner}/${repo}`));
-      return data.default_branch || 'main';
-    }
-
-    async function fetchTree(branchName) {
-      // Git Trees API supports ref names in place of sha
-      const url = api(`/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branchName)}?recursive=1`);
-      return fetchJSON(url);
-    }
-
-    async function load() {
-      els.refresh.disabled = true; els.refresh.textContent = 'Carregando…';
-      try {
-        const def = await resolveDefaultBranch();
-        state.branch = def;
-        let treeData;
-        try {
-          treeData = await fetchTree(def);
-        } catch(err) {
-          // fallback attempts
-          for (const candidate of ['main','master','HEAD']) {
-            if (candidate === def) continue;
-            try { treeData = await fetchTree(candidate); state.branch = candidate; break; } catch(e) { /* keep trying */ }
-          }
-          if (!treeData) throw err;
-        }
-        state.tree = (treeData.tree || []).filter(e => e.type === 'blob' || e.type === 'tree');
-        state.byDir = buildIndex(state.tree);
-        render();
-      } catch (err) {
-        console.error(err);
-        els.list.innerHTML = `
-          <div class="card">
-            <div class="head"><div class="title">Erro ao carregar</div></div>
-            <div class="files"><div class="file"><span class="path">${err.message || err}</span></div></div>
-          </div>`;
-      } finally {
-        els.refresh.disabled = false; els.refresh.textContent = '🔄 Recarregar';
-      }
-    }
-
-    // Copy all links currently shown
-    function copyAllVisible() {
-      const useRaw = els.rawLinks.checked;
-      const q = els.search.value.trim().toLowerCase();
-      const match = (p) => q === '' || p.toLowerCase().includes(q);
-      const links = [];
-      for (const e of state.tree) {
-        if (e.type !== 'blob') continue;
-        if (!match(e.path)) continue;
-        const { raw, blob } = buildLinks(e.path);
-        links.push(useRaw ? raw : blob);
-      }
-      if (!links.length) return;
-      copyToClipboard(links.join('\n'));
-      els.copyAll.textContent = '📋 Copiado!';
-      setTimeout(()=> els.copyAll.textContent = '📋 Copiar links', 1200);
-    }
-
-    // Events
-    els.search.addEventListener('input', () => render());
-    els.showDirs.addEventListener('change', render);
-    els.rawLinks.addEventListener('change', render);
-    els.copyAll.addEventListener('click', copyAllVisible);
-    els.refresh.addEventListener('click', load);
-
-    // First load
-    load();
+      lista.appendChild(div);
+    });
   </script>
 </body>
 </html>
