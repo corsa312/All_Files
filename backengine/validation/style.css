@@ -1,0 +1,49 @@
+/* Corpo com fundo em degradê do amarelo ao preto */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;  /* Centraliza horizontalmente */
+    align-items: center;      /* Centraliza verticalmente */
+    background: linear-gradient(60deg, yellow, black); /* Degradê vertical */
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Caixa do formulário */
+  .login-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Fundo branco translúcido */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    width: 300px;
+    text-align: center;
+  }
+  
+  input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: black;
+    color: yellow;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #333;
+  }
+  
+  #mensagem {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  

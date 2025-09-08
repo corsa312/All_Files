@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Validador de E-mail</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #404040;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      color: #1f2937; /* cinza escuro */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: #737374;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #ffffff; /* quase preto */
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #374151;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* sombra suave padrão */
+      transition: box-shadow 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 8px 3px rgba(54, 126, 198, 0.6); /* sombra azul mais forte no foco */
+      border-color: #367ec6;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #15803d;
+    }
+
+    button:disabled {
+      background-color: #a1a1aa;
+      cursor: not-allowed;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 20px;
+      }
+
+      input,
+      button {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Validação de E-mail</h2>
+    <input type="text" id="email" placeholder="Digite seu e-mail completo" />
+    <button id="btnVerificar" onclick="verificarEmail()" disabled>Verificar</button>
+    <p id="resultado"></p>
+  </div>
+
+  <script>
+    const emailInput = document.getElementById("email");
+    const btnVerificar = document.getElementById("btnVerificar");
+    const resultado = document.getElementById("resultado");
+
+    // Regex mais completa para validação comum de e-mail
+    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // Habilita/desabilita botão conforme input
+    emailInput.addEventListener("input", () => {
+      btnVerificar.disabled = emailInput.value.trim() === "";
+      resultado.textContent = ""; // limpa mensagem ao digitar
+    });
+
+    // Permite validar ao apertar Enter
+    emailInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !btnVerificar.disabled) {
+        verificarEmail();
+      }
+    });
+
+    function verificarEmail() {
+      const email = emailInput.value.trim();
+
+      if (regexEmail.test(email)) {
+  resultado.innerHTML = `<span style="color: #22c55e; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">✔️ Formato válido de e-mail!</span>`;
+} else {
+  resultado.innerHTML = `<span style="color: #ef4444; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">❌ Formato inválido!</span>`;
+}
+    }
+  </script>
+
+</body>
+</html>

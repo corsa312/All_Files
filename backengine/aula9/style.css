@@ -1,0 +1,65 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  padding-top: 50px;
+  transition: background 0.5s ease-in-out, color 0.5s;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body.morning {
+  background: linear-gradient(-45deg, #f6b26b, #ffd8a8, #f6b26b, #5c3c10);
+  color: #4e342e;
+  animation: gradientBG 20s ease infinite;
+  background-size: 400% 400%;
+}
+
+body.afternoon {
+  background: linear-gradient(-45deg, #a5c3a0, #f0ebe3, #6b705c);
+  color: #2e3d2f;
+  animation: gradientBG 20s ease infinite;
+  background-size: 400% 400%;
+}
+
+body.night {
+  background: linear-gradient(-45deg, #0f172a, #334155, #0f172a, #94a3b8);
+  color: #eceff1;
+  animation: gradientBG 20s ease infinite;
+  background-size: 400% 400%;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 600px;
+  margin: auto;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transition: background 0.5s ease;
+}
+
+body.night .container {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
+h1 {
+  font-size: 2.2em;
+  margin-bottom: 25px;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 15px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+img:hover {
+  transform: scale(1.03);
+}

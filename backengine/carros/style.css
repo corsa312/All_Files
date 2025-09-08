@@ -1,0 +1,246 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #ffffe0;
+    color: #333;
+    padding-top: 80px;
+}
+
+header {
+    background-color: #1e90ff;
+    color: white;
+    padding: 15px 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo img {
+    height: 50px;
+    margin-left: 20px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    font-weight: bold;
+}
+
+nav ul li a:hover {
+    background-color: #187bcd;
+    border-radius: 5px;
+}
+
+main {
+    padding: 20px;
+}
+
+.banner {
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../imagens/banner.jpg');
+    background-size: cover;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+}
+
+.banner h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.veiculos-destaque {
+    margin: 30px 0;
+}
+
+.veiculos-destaque h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2em;
+    color: #1e90ff;
+}
+
+.grid-veiculos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.veiculo-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.veiculo-card:hover {
+    transform: translateY(-10px);
+}
+
+.veiculo-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.veiculo-card h3 {
+    margin: 15px 0;
+    color: #1e90ff;
+}
+
+.veiculo-card p {
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #1e90ff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #187bcd;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+/* Estilo para a página de reserva */
+.form-reserva {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.form-reserva h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1e90ff;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input, 
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.btn-reservar {
+    background-color: #4CAF50;
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+}
+
+.btn-reservar:hover {
+    background-color: #45a049;
+}
+
+/* Estilo para confirmação */
+.confirmacao {
+    text-align: center;
+    max-width: 600px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.confirmacao h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.confirmacao p {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+/* Estilo para páginas de veículos */
+.detalhes-veiculo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin: 30px 0;
+}
+
+.detalhes-veiculo img {
+    flex: 1;
+    min-width: 300px;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.info-veiculo {
+    flex: 1;
+    min-width: 300px;
+}
+
+.info-veiculo h2 {
+    color: #1e90ff;
+    margin-bottom: 20px;
+}
+
+.info-veiculo ul {
+    margin: 20px 0;
+    list-style-position: inside;
+}
+
+.info-veiculo li {
+    margin-bottom: 10px;
+}
+
+.preco {
+    font-size: 1.5em;
+    color: #4CAF50;
+    font-weight: bold;
+    margin: 20px 0;
+}

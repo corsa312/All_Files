@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Calculando velocidade com funcao SE (if)</title>
+</head>
+<body>
+<h1>Sistema de Multas</h1>
+Velocidade do carro: <input type="number" name="txtvel" id="txtvel">Km/h
+<input type="button" value="Verificar" onclick="calcular()">
+<div id="res">
+
+</div>
+<script>
+function calcular() { 
+    var txtv = window.document.querySelector("input#txtvel"); // Captura oque está no campo de entrada onde o usuário digita a velocidade 
+    var res = window.document.querySelector("div#res"); // Captura a div onde os resultados serão exibidos
+    var vel = Number(txtv.value); // Converte o valor digitado pelo usuário para um número
+    res.innerHTML = `<p>Sua velocidade atual é de <strong>${vel}</strong> Km/h.</p>`; // Exibe a velocidade atual do usuário na div
+    if (vel > 60) { // Verifica se a velocidade digitada é maior que 60 Km/h
+        res.innerHTML += `<p>Você está <strong>multado</strong> por excesso de velocidade.</p>`; // Se for maior, adiciona uma mensagem indicando que o usuário foi multado
+    }
+    res.innerHTML += `<p>Dirija sempre com cinto de segurança!</p>`; // Adiciona uma mensagem de segurança, independente da velocidade
+}
+</script>
+</body>
+</html>

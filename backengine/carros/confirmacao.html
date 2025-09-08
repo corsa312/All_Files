@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação - AutoRent</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#veiculos">Veículos</a></li>
+                <li><a href="#contato">Contato</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="confirmacao">
+            <h2>Reserva Confirmada!</h2>
+            <p>Obrigado por escolher a AutoRent. Sua reserva foi confirmada com sucesso.</p>
+            <p>Detalhes da reserva foram enviados para seu e-mail.</p>
+            <a href="index.html" class="btn">Voltar à página inicial</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>AutoRent &copy; 2023 - Todos os direitos reservados</p>
+        <p>Contato: contato@autorent.com | (11) 1234-5678</p>
+    </footer>
+</body>
+<!-- Adicione este script no final do body -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const veiculo = urlParams.get('veiculo');
+        const dias = urlParams.get('dias');
+        
+        if(veiculo) {
+            const veiculoElement = document.createElement('p');
+            veiculoElement.innerHTML = `<strong>Veículo:</strong> ${veiculo}`;
+            document.querySelector('.confirmacao').insertBefore(veiculoElement, document.querySelector('.confirmacao p:first-child'));
+            
+            if(dias) {
+                const diasElement = document.createElement('p');
+                diasElement.innerHTML = `<strong>Período:</strong> ${dias} dia(s)`;
+                document.querySelector('.confirmacao').insertBefore(diasElement, document.querySelector('.confirmacao a'));
+            }
+        }
+    });
+    </script>
+</html>

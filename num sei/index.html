@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Página 1</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Python e HTML Juntos: Uma Dupla Poderosa na Web</h1>
+    <p>Python e HTML são linguagens com propósitos diferentes, mas quando combinadas, elas se tornam a base para a maioria dos sites e aplicações web que usamos todos os dias. Pense no HTML como o esqueleto e a pele de um site, e no Python como o cérebro que faz tudo funcionar por trás das cenas.</p>
+
+    <h2>O que é HTML? (A Estrutura da Página)</h2>
+    <p>HTML (HyperText Markup Language) é a linguagem padrão para criar páginas web. Ele define a estrutura e o conteúdo de uma página. Imagine-o como o projeto arquitetônico de uma casa, especificando onde as paredes, janelas e portas estarão.</p>
+
+    <h3>Exemplo Simples de HTML:</h3>
+    <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+   &lt;title&gt;Minha Primeira Página&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+   &lt;h1&gt;Bem-vindo ao meu site!&lt;/h1&gt;
+   &lt;p&gt;Este é um parágrafo de exemplo.&lt;/p&gt;
+   &lt;a href="https://www.google.com"&gt;Ir para o Google&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+    <p><code>&lt;h1&gt;</code> é um título principal.<br>
+       <code>&lt;p&gt;</code> é um parágrafo.<br>
+       <code>&lt;a&gt;</code> é um link.</p>
+
+    <h2>O que é Python? (A Lógica por Trás da Cena)</h2>
+    <p>Python é uma linguagem de programação versátil e poderosa que pode ser usada para muitas coisas, incluindo o desenvolvimento web. No contexto da web, Python é frequentemente usado no "backend" (o lado do servidor).</p>
+
+    <h3>Exemplo Simples de Python:</h3>
+    <pre>nome = "Mundo"
+mensagem = f"Olá, {nome}!"
+print(mensagem)</pre>
+
+    <h2>Como Eles Trabalham Juntos? (O Backend e o Frontend)</h2>
+    <p>Aqui é onde a mágica acontece! Python e HTML se unem através de frameworks web como Flask ou Django.</p>
+    <ul>
+      <li><strong>Requisição do Navegador:</strong> O navegador envia uma requisição para o servidor.</li>
+      <li><strong>Processamento pelo Python:</strong> Ele executa a lógica necessária, busca dados, processa formulários, etc.</li>
+      <li><strong>Geração do HTML Dinâmico:</strong> Python monta o HTML com os dados processados.</li>
+      <li><strong>Resposta ao Navegador:</strong> O HTML é enviado de volta e exibido ao usuário.</li>
+    </ul>
+
+    <h3>Exemplo Prático com Flask:</h3>
+    <p><strong>Passo 1:</strong> Instale o Flask:</p>
+    <pre>pip install Flask</pre>
+
+    <p><strong>Passo 2:</strong> Código Python:</p>
+    <pre>from flask import Flask, render_template_string
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    nome_usuario = "Visitante"
+    html_content = f"""
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;&lt;title&gt;Saudação Personalizada&lt;/title&gt;&lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Olá, {nome_usuario}!&lt;/h1&gt;
+        &lt;p&gt;Bem-vindo à sua página personalizada.&lt;/p&gt;
+        &lt;p&gt;A data e hora atual é: {get_current_time()}&lt;/p&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+    """
+    return render_template_string(html_content)
+
+def get_current_time():
+    from datetime import datetime
+    return datetime.now().strftime("%H:%M:%S em %d/%m/%Y")
+
+if __name__ == '__main__':
+    app.run(debug=True)</pre>
+
+    <p><strong>Passo 3:</strong> Execute e abra no navegador <code>http://127.0.0.1:5000</code></p>
+
+    <h2>Templates com Jinja2</h2>
+    <p>Em vez de montar HTML com strings, você pode usar templates:</p>
+    <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+   &lt;title&gt;Saudação com Template&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+   &lt;h1&gt;Olá, {{ nome }}!&lt;/h1&gt;
+   &lt;p&gt;Você está acessando a página agora: {{ data_hora }}.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+    <p><strong>No Python:</strong></p>
+    <pre>from flask import Flask, render_template
+from datetime import datetime
+
+app = Flask(__name__)
+
+@app.route('/')
+def home_template():
+    nome_usuario = "Aventureiro"
+    data_atual = datetime.now().strftime("%H:%M:%S em %d/%m/%Y")
+    return render_template('index.html', nome=nome_usuario, data_hora=data_atual)</pre>
+
+    <h2>Resumo Final</h2>
+    <ul>
+      <li><strong>HTML:</strong> estrutura e conteúdo da página.</li>
+      <li><strong>Python:</strong> lógica, dados e interatividade.</li>
+      <li>Juntos: criam páginas web dinâmicas, interativas e personalizadas.</li>
+    </ul>
+
+    <a href="pagina2.html">Ir para Página 2</a>
+  </div>
+</body>
+</html>

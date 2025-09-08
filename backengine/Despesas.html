@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de CLT</title>
+</head>
+<body>
+    <h1>Calculadora de CLT</h1>
+
+    <label for="salario">Salário:</label>
+    <input type="number" id="salario" name="salario" placeholder="Digite seu salário"><br><br>
+
+    <label for="despesas1">Despesa 1:</label>
+    <input type="number" id="despesas1" name="despesas1" placeholder="Digite suas despesas"><br><br>
+
+    <label for="despesas2">Despesa 2:</label>
+    <input type="number" id="despesas2" name="despesas2" placeholder="Digite suas despesas"><br><br>
+
+    <label for="despesas3">Despesa 3:</label>
+    <input type="number" id="despesas3" name="despesas3" placeholder="Digite suas despesas"><br><br>
+
+    <button onclick="calcularDespesas()">Calcular Despesas</button>
+
+    <h2 id="resultado"></h2>
+
+    <script>
+        function calcularDespesas() {
+            var salario = parseFloat(document.getElementById('salario').value) || 0;
+            var despesas1 = parseFloat(document.getElementById('despesas1').value) || 0;
+            var despesas2 = parseFloat(document.getElementById('despesas2').value) || 0;
+            var despesas3 = parseFloat(document.getElementById('despesas3').value) || 0;
+
+            const totalDespesas = despesas1 + despesas2 + despesas3;
+            const saldoFinal = salario - totalDespesas;
+
+            const perc1 = totalDespesas > 0 ? (despesas1 / totalDespesas) * 100 : 0;
+            const perc2 = totalDespesas > 0 ? (despesas2 / totalDespesas) * 100 : 0;
+            const perc3 = totalDespesas > 0 ? (despesas3 / totalDespesas) * 100 : 0;
+
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = `
+                Total de despesas: R$ ${totalDespesas.toFixed(2)}<br>
+                Saldo final: R$ ${saldoFinal.toFixed(2)}<br><br>
+                Percentual da Despesa 1: ${perc1.toFixed(2)}%<br>
+                Percentual da Despesa 2: ${perc2.toFixed(2)}%<br>
+                Percentual da Despesa 3: ${perc3.toFixed(2)}%
+            `;
+        }
+    </script>
+</body>
+</html>
