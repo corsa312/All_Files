@@ -10,6 +10,18 @@ const btnPause = document.getElementById('btnPause');
 
 const W = cv.width, H = cv.height;
 
+// 🔊 Sons
+const bgMusic = new Audio("ambiente.mp3"); // som ambiente
+bgMusic.loop = true;
+bgMusic.volume = 0.4;
+
+const mainMusic = new Audio("musica.mp3"); // música principal
+mainMusic.loop = true;
+mainMusic.volume = 0.6;
+
+const hornSound = new Audio("buzina.mp3"); // buzina
+hornSound.volume = 0.7;
+
 const state = {
     running: false,
     paused: false,
@@ -51,7 +63,15 @@ function createCar() {
 function createEnemy(yOff = -rand(200, 600)) {
     const lane = Math.floor(rand(0, state.lanes));
     const w = 44, h = 82;
-    return { x: laneX(lane), y: yOff, w, h, lane, color: Math.random() > .5 ? '#ff5a60' : '#ffb84d' };
+    return { 
+        x: laneX(lane), 
+        y: yOff, 
+        w, 
+        h, 
+        lane, 
+        color: Math.random() > .5 ? '#ff5a60' : '#ffb84d',
+        horned: false 
+    };
 }
 
 function createLines() {
@@ -129,7 +149,16 @@ setHold(leftPad, 'left');
 setHold(rightPad, 'right');
 
 btnStart.addEventListener('click', start);
-btnPause.addEventListener('click', () => { state.paused = !state.paused });
+btnPause.addEventListener('click', () => { 
+    state.paused = !state.paused;
+    if (state.paused) {
+        mainMusic.pause();
+        bgMusic.pause();
+    } else {
+        mainMusic.play().catch(()=>{});
+        bgMusic.play().catch(()=>{});
+    }
+});
 
 function reset(){
     state.score = 0;
@@ -139,9 +168,9 @@ function reset(){
     createLines();
     for(let i=0;i<5;i++) state.enemies.push(createEnemy(-i*220 - 200));
   
-    tutorial.hidden = true;   // sempre some
-    gameover.hidden = true;   // sempre some
-  }
+    tutorial.hidden = true;
+    gameover.hidden = true;
+}
 
 function start(){
     reset();
@@ -149,18 +178,32 @@ function start(){
       state.running = true;
       state.paused = false;
       state.t0 = performance.now();
+
+      // 🎶 Inicia música de fundo
+      mainMusic.currentTime = 0;
+      mainMusic.play().catch(()=>{});
+
+      // 🌫️ Opcional: som ambiente
+      bgMusic.currentTime = 0;
+      bgMusic.play().catch(()=>{});
+
       requestAnimationFrame(loop);
     }
 }
 
 function gameOver(){
     state.running = false;
-    tutorial.hidden = true;   // garante que o tutorial não aparece junto
-    gameover.hidden = false;  // só mostra o game over
+
+    // 🔇 Para as músicas
+    mainMusic.pause();
+    bgMusic.pause();
+
+    tutorial.hidden = true;
+    gameover.hidden = false;
     state.best = Math.max(state.best, Math.floor(state.score));
     localStorage.setItem('bestTopDownScore', String(state.best));
     uiBest.textContent = `⭐ ${state.best}`;
-  }
+}
 
 function spawnIfNeeded() {
     const last = state.enemies[state.enemies.length - 1];
@@ -177,15 +220,40 @@ function spawnIfNeeded() {
 function update(dt) {
     if (state.paused) return;
     state.roadSpeed = clamp(state.roadSpeed + state.accel * dt, 0, state.maxSpeed);
+
     for (const s of state.lines) { s.y += state.roadSpeed * dt; if (s.y > H) s.y -= H + 60; }
-    for (const e of state.enemies) { e.y += state.roadSpeed * dt * 0.98; }
+
+    for (const e of state.enemies) { 
+        e.y += state.roadSpeed * dt * 0.98;
+
+        // 🚗 Buzina chance aleatória (30%) se player estiver perto e na mesma faixa
+        const dy = Math.abs(state.car.y - e.y);
+        if (dy < 120 && e.lane === state.car.lane) {
+            if (!e.horned) {
+                if (Math.random() < 0.5) { // 50% de chance
+                    const horn = hornSound.cloneNode();
+                    horn.play().catch(()=>{});
+                }
+                e.horned = true;
+            }
+        } else {
+            e.horned = false;
+        }
+    }
+
     spawnIfNeeded();
+
     const laneW = state.roadWidth / state.lanes;
     const targetSx = (state.input.left ? -1 : 0) + (state.input.right ? 1 : 0);
     state.car.sx += (targetSx - state.car.sx) * 12 * dt;
     state.car.x += state.car.sx * 320 * dt;
     state.car.x = clamp(state.car.x, state.margin + laneW * 0.5, state.margin + state.roadWidth - laneW * 0.5);
+
+    // Atualiza lane atual do player
+    state.car.lane = Math.round((state.car.x - state.margin) / laneW);
+
     for (const e of state.enemies) { if (aabbHit(state.car, e)) { gameOver(); break; } }
+
     state.score += (state.roadSpeed * 0.016) * dt;
     state.speed = Math.round(state.roadSpeed * 3.6 / 100);
 }
