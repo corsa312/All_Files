@@ -1,77 +1,217 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Links das Pastas • corsa312/All_Files</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Links do repositório All_Files</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #1a1a1a;
-      color: #eee;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      color: #222;
     }
-    h1 {
-      color: #9b59b6;
-    }
-    .file {
+    header {
       display: flex;
-      justify-content: space-between;
-      padding: 8px 12px;
-      margin: 4px 0;
-      background: #2a2a2a;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      background: #24292f;
+      color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    h1 {font-size: 1.5rem; margin: 0;}
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin: 20px auto;
+      max-width: 900px;
+      padding: 0 16px;
+    }
+    input[type=text], select, button {
+      padding: 10px;
       border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+      outline: none;
     }
-    .file:hover {
-      background: #3a2a4a;
+    input[type=text] { flex: 1; }
+    button {
+      background: #6f42c1;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    a {
-      color: #c39bd3;
-      text-decoration: none;
-      font-weight: bold;
+    button:hover { background: #5936a2; }
+    .meta, #status {
+      margin: 10px auto;
+      max-width: 900px;
+      padding: 0 16px;
+      color: #444;
+      font-size: 0.9rem;
     }
-    a:hover {
-      text-decoration: underline;
+    .list { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+    .folder { background: white; margin: 12px 0; padding: 12px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .folder h3 { margin: 0; font-size: 1.1rem; color: #6f42c1; display: flex; align-items: center; cursor: pointer; }
+    .folder h3 .arrow { display: inline-block; margin-right: 6px; transition: transform 0.3s ease; }
+    ul { list-style: none; padding: 0; margin: 8px 0 0; overflow: hidden; max-height: 0; transition: max-height 0.4s ease; }
+    ul.open { max-height: 1000px; }
+    li { margin: 6px 0; padding: 6px; border-radius: 6px; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
+    li:hover { background: #f5f0fa; }
+    .btn { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; text-decoration: none; font-weight: 500; transition: background 0.2s; }
+    .btn-code { background: #6f42c1; color: white; }
+    .btn-code:hover { background: #5936a2; }
+    .btn-test { background: #28a745; color: white; }
+    .btn-test:hover { background: #1c7c31; }
+    small { color: #666; font-size: 0.85rem; }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #24292f;
+      color: white;
+      margin-top: 40px;
+      font-size: 0.85rem;
     }
   </style>
 </head>
 <body>
-  <h1>📂 Pastas - corsa312/All_Files</h1>
-  <div id="lista"></div>
+  <header>
+    <svg width="40" height="40" viewBox="0 0 16 16" fill="white" aria-hidden><path d="M8 .198a7.802 7.802 0 00-2.466 15.218c.39.072.533-.17.533-.378 0-.186-.007-.679-.01-1.333-2.168.471-2.625-1.044-2.625-1.044-.354-.901-.866-1.143-.866-1.143-.708-.484.054-.474.054-.474.783.055 1.195.805 1.195.805.696 1.193 1.826.849 2.271.65.071-.506.273-.85.497-1.046-1.732-.197-3.553-.866-3.553-3.854 0-.852.305-1.55.805-2.096-.081-.197-.349-.99.077-2.063 0 0 .659-.211 2.16.8a7.47 7.47 0 011.968-.265c.67.003 1.345.09 1.968.265 1.5-1.01 2.158-.8 2.158-.8.428 1.073.16 1.866.08 2.063.5.546.803 1.244.803 2.096 0 2.994-1.825 3.653-3.563 3.846.281.244.532.725.532 1.462 0 1.055-.01 1.906-.01 2.165 0 .21.14.454.537.377A7.803 7.803 0 008 .198z"/></svg>
+    <div>
+      <h1>All_Files — Links do Repositório</h1>
+      <div class="meta" style="color:#ddd">Carrega a lista de arquivos e gera links (raw/GitHub)</div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <input id="search" type="text" placeholder="🔍 Pesquisar por nome/extensão..." />
+    <button id="refresh">⟳ Atualizar</button>
+  </div>
+
+  <div class="meta">Repositório: <a id="repoLink" href="#" target="_blank"></a></div>
+  <div id="status" class="meta"></div>
+
+  <div class="list" id="filesList"></div>
 
   <script>
-    // 🔧 Lista de pastas do seu repositório
-    const arquivos = [
-      { path: "redline/", type: "dir" },
-      { path: "numsei/", type: "dir" },
-      { path: "backengine/", type: "dir" },
-      { path: "Project Python/", type: "dir" }
-    ];
+    const owner = 'corsa312';
+    const repo = 'All_Files';
+    const branch = 'main';
+    const repoUrl = `https://github.com/${owner}/${repo}`;
+    document.getElementById('repoLink').href = repoUrl;
+    document.getElementById('repoLink').textContent = repoUrl;
 
-    // Config do seu repositório
-    const owner = "corsa312";
-    const repo  = "All_Files";
-    const branch = "main"; // troque se usar master
+    const statusEl = document.getElementById('status');
+    const filesList = document.getElementById('filesList');
+    const searchInput = document.getElementById('search');
+    const refreshBtn = document.getElementById('refresh');
 
-    const lista = document.getElementById("lista");
-
-    arquivos.forEach(item => {
-      let url;
-      if (item.type === "file") {
-        url = `https://github.com/${owner}/${repo}/blob/${branch}/${item.path}`;
-      } else {
-        url = `https://github.com/${owner}/${repo}/tree/${branch}/${item.path}`;
+    async function loadTree() {
+      statusEl.textContent = '⏳ Carregando lista de arquivos...';
+      filesList.innerHTML = '';
+      try {
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+        const res = await fetch(apiUrl);
+        if(!res.ok) throw new Error('Erro ao acessar a API do GitHub: ' + res.status);
+        const data = await res.json();
+        const tree = data.tree || [];
+        statusEl.textContent = `✅ Arquivos encontrados: ${tree.length}`;
+        renderTree(tree);
+      } catch (err) {
+        statusEl.textContent = '❌ Falha: ' + err.message;
       }
+    }
 
-      const div = document.createElement("div");
-      div.className = "file";
-      div.innerHTML = `
-        <span>${item.type === "dir" ? "📁" : "📄"} ${item.path}</span>
-        <a href="${url}" target="_blank">Abrir</a>
-      `;
-      lista.appendChild(div);
-    });
+    function renderTree(tree) {
+      const folders = {};
+      tree.forEach(item => {
+        if (item.type !== 'blob') return;
+        const parts = item.path.split('/');
+        const filename = parts.pop();
+        const folder = parts.length ? parts.join('/') : '/';
+        if (!folders[folder]) folders[folder] = [];
+        folders[folder].push({ path: item.path, filename, size: item.size });
+      });
+
+      const search = searchInput.value.trim().toLowerCase();
+
+      const folderKeys = Object.keys(folders).sort((a,b)=> a.localeCompare(b));
+      if(folderKeys.length === 0){ filesList.innerHTML = '<div class="meta">Nenhum arquivo encontrado.</div>'; return }
+
+      folderKeys.forEach(folder => {
+        const matches = folders[folder].filter(f => {
+          if (!search) return true;
+          return f.filename.toLowerCase().includes(search) || f.path.toLowerCase().includes(search);
+        });
+        if(matches.length === 0) return;
+
+        const folderDiv = document.createElement('div');
+        folderDiv.className = 'folder';
+
+        const h = document.createElement('h3');
+        const arrow = document.createElement('span');
+        arrow.textContent = '▶';
+        arrow.className = 'arrow';
+        h.appendChild(arrow);
+        h.appendChild(document.createTextNode(folder === '/' ? '📂 Raiz' : '📁 ' + folder));
+        folderDiv.appendChild(h);
+
+        const ul = document.createElement('ul');
+        matches.sort((a,b)=> a.filename.localeCompare(b.filename));
+        matches.forEach(f => {
+          const li = document.createElement('li');
+
+          const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${f.path}`;
+          const testUrl = `https://htmlpreview.github.io/?https://github.com/${owner}/${repo}/blob/${branch}/${f.path}`;
+
+          if(f.filename.toLowerCase().endsWith('.html')){
+            const btnCode = document.createElement('a');
+            btnCode.href = rawUrl;
+            btnCode.target = '_blank';
+            btnCode.className = 'btn btn-code';
+            btnCode.textContent = 'Ver código';
+
+            const btnTest = document.createElement('a');
+            btnTest.href = testUrl;
+            btnTest.target = '_blank';
+            btnTest.className = 'btn btn-test';
+            btnTest.textContent = '▶ Testar';
+
+            li.appendChild(document.createTextNode(f.filename));
+            li.appendChild(btnCode);
+            li.appendChild(btnTest);
+          } else {
+            const btnCode = document.createElement('a');
+            btnCode.href = rawUrl;
+            btnCode.target = '_blank';
+            btnCode.className = 'btn btn-code';
+            btnCode.textContent = 'Ver código';
+
+            li.appendChild(document.createTextNode(f.filename));
+            li.appendChild(btnCode);
+          }
+
+          ul.appendChild(li);
+        });
+
+        folderDiv.appendChild(ul);
+        filesList.appendChild(folderDiv);
+
+        h.addEventListener('click', ()=>{
+          const isOpen = ul.classList.toggle('open');
+          arrow.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0)';
+        });
+      });
+    }
+
+    refreshBtn.addEventListener('click', loadTree);
+    searchInput.addEventListener('input', () => loadTree());
+
+    loadTree();
   </script>
+
+  <footer>Feito com ❤️ para navegar no repositório GitHub</footer>
 </body>
 </html>
