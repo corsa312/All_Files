@@ -1,0 +1,171 @@
+:root {
+    --bg: #0b1020;
+    --road: #1a1f33;
+    --lane: #d9dee8;
+    --car: #2ee6a6;
+    --enemy: #ff5a60;
+    --hud: #ffffff;
+    --accent: #8ab4ff;
+}
+
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    background: radial-gradient(1200px 600px at 50% -20%, #0e1530 0%, var(--bg) 60%);
+    color: var(--hud);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"
+}
+
+.wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding: 16px
+}
+
+.game-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+    padding: 16px
+}
+
+canvas {
+    display: block;
+    background: linear-gradient(#0c0f1d, #0b0f1a);
+    border-radius: 16px
+}
+
+.hud {
+    position: absolute;
+    inset: 16px 16px auto auto;
+    display: flex;
+    gap: 12px;
+    align-items: center
+}
+
+.badge {
+    background: rgba(0, 0, 0, .35);
+    border: 1px solid rgba(255, 255, 255, .12);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 12px
+}
+
+.controls {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 18px;
+    display: flex;
+    gap: 8px
+}
+
+.btn {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .06);
+    color: var(--hud);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+    transition: transform .08s ease, filter .2s ease
+}
+
+.btn:hover {
+    filter: brightness(1.15)
+}
+
+.btn:active {
+    transform: translateY(1px)
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,14,30,.8);
+    pointer-events: none;   /* overlays não bloqueiam cliques */
+  }
+
+.overlay[hidden] {
+    display: none;          /* se estiver hidden, não aparece */
+  }
+
+.overlay:not([hidden]) {
+    pointer-events: auto;   /* só capta cliques quando visível */
+  }
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 22px 20px;
+    background: rgba(10, 14, 30, .8);
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 16px
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: .4px
+}
+
+.sub {
+    opacity: .8;
+    font-size: 13px
+}
+
+
+/* Touch arrows */
+.touch {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    pointer-events: none
+}
+
+.touch .pad {
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .06);
+    display: grid;
+    place-items: center;
+    font-weight: 800
+}
+
+
+/* Responsive canvas size */
+.stage {
+    width: min(92vw, 480px);
+}
+
+canvas {
+    width: 100%;
+    height: auto
+}

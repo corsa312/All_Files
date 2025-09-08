@@ -1,0 +1,53 @@
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Corrida Top‑Down</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<div class="game-card stage">
+<div class="hud" id="hud">
+<div class="badge" id="score">🏁 0</div>
+<div class="badge" id="speed">🚗 0 km/h</div>
+<div class="badge" id="best">⭐ 0</div>
+</div>
+<canvas id="game" width="450" height="700" aria-label="Jogo de corrida"></canvas>
+<div class="controls">
+<button class="btn" id="btnStart">Iniciar / Reiniciar (Espaço)</button>
+<button class="btn" id="btnPause">Pausar (P)</button>
+</div>
+
+
+<!-- Touch controls (mobile) -->
+<div class="touch" aria-hidden="true">
+<div class="pad" id="left">◀︎</div>
+<div class="pad" id="right">▶︎</div>
+</div>
+
+
+<!-- Tela inicial/tutorial -->
+<div class="overlay" id="tutorial">
+<div class="panel">
+<div class="title">Pronto para correr?</div>
+<div class="sub">Setas ou A/D para mover. Evite o tráfego!
+<br/>Segure os botões ◀︎ ▶︎ no celular.</div>
+</div>
+</div>
+
+
+<!-- Tela de Game Over -->
+<div class="overlay" id="gameover" hidden>
+<div class="panel">
+<div class="title">💥 Game Over!</div>
+<div class="sub">Você bateu!<br/>Pressione Espaço ou clique em Iniciar para tentar novamente.</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<script src="script.js"></script>
+</body>
+</html>
