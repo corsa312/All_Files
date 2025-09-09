@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Horizon Chase - Chevrolet Corsa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="score">Pontos: 0</div>
+  <div id="gameOverScreen">
+    <h1>GAME OVER</h1>
+    <p id="finalScore"></p>
+    <button onclick="restartGame()">Reiniciar</button>
+    <button onclick="showScores()">Ver Pontuações</button>
+    <div id="scoreHistory"></div>
+  </div>
+
+  <!-- Carregando Three.js no modo clássico -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+  <!-- Seu script do jogo -->
+  <script src="script.js"></script>
+</body>
+</html>

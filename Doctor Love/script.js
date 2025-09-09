@@ -1,0 +1,334 @@
+let scoreHistory = [];
+
+// Cena
+const scene = new THREE.Scene();
+
+// Câmera
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Luz ambiente
+const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+scene.add(light);
+
+// Céu
+const skyGeo = new THREE.SphereGeometry(500, 32, 32);
+const skyMat = new THREE.MeshBasicMaterial({ color: 0x87ceeb, side: THREE.BackSide });
+const sky = new THREE.Mesh(skyGeo, skyMat);
+scene.add(sky);
+
+// Sol
+const sunGeo = new THREE.CircleGeometry(10, 32);
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xffdd55 });
+const sun = new THREE.Mesh(sunGeo, sunMat);
+sun.position.set(0, 40, -150);
+scene.add(sun);
+
+// Estrada
+const roadWidth = 12;
+const roadGeo = new THREE.PlaneGeometry(roadWidth, 400, 1, 40);
+const roadMat = new THREE.MeshPhongMaterial({ color: 0x222222, side: THREE.DoubleSide });
+const road = new THREE.Mesh(roadGeo, roadMat);
+road.rotation.x = -Math.PI / 2;
+road.position.z = -100;
+scene.add(road);
+
+// Acostamentos
+function createSidewalk(x) {
+  const geo = new THREE.PlaneGeometry(15, 400);
+  const mat = new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide });
+  const side = new THREE.Mesh(geo, mat);
+  side.rotation.x = -Math.PI / 2;
+  side.position.set(x, 0, -100);
+  scene.add(side);
+}
+createSidewalk(-roadWidth/2 - 15/2);
+createSidewalk( roadWidth/2 + 15/2);
+
+// Calçadas
+function createSidewalkBorder(x) {
+  const borderGeo = new THREE.BoxGeometry(1.5, 0.3, 400);
+  const borderMat = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+  const border = new THREE.Mesh(borderGeo, borderMat);
+  border.position.set(x, 0.15, -100);
+  scene.add(border);
+}
+createSidewalkBorder(-roadWidth/2 - 0.75);
+createSidewalkBorder( roadWidth/2 + 0.75);
+
+// Faixas brancas
+const stripes = [];
+function createStripe(z) {
+  const stripeGeo = new THREE.PlaneGeometry(0.5, 4);
+  const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+  const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+  stripe.rotation.x = -Math.PI / 2;
+  stripe.position.set(0, 0.01, z);
+  scene.add(stripe);
+  stripes.push(stripe);
+}
+for (let i = 0; i < 20; i++) createStripe(-i * 10);
+
+// Postes
+const lamps = [];
+function createLamp(x, z) {
+  const post = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.15, 4),
+    new THREE.MeshPhongMaterial({ color: 0xaaaaaa })
+  );
+  post.position.set(x, 2, z);
+
+  const bulb = new THREE.Mesh(
+    new THREE.SphereGeometry(0.3, 8, 8),
+    new THREE.MeshPhongMaterial({ color: 0xffffaa, emissive: 0xffff33 })
+  );
+  bulb.position.y = 2;
+  post.add(bulb);
+
+  scene.add(post);
+  lamps.push(post);
+}
+for (let i=0; i<10; i++) {
+  createLamp(-8, -i*20-20);
+  createLamp( 8, -i*20-40);
+}
+
+// Prédios
+const buildings = [];
+function createBuilding(z) {
+  const w = 4 + Math.random() * 3;
+  const h = 6 + Math.random() * 10;
+  const d = 4 + Math.random() * 3;
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mat = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff, flatShading: true });
+  const building = new THREE.Mesh(geo, mat);
+  const side = Math.random() < 0.5 ? -1 : 1;
+  const x = side * (roadWidth/2 + 10 + Math.random()*15);
+  building.position.set(x, h/2, z);
+  scene.add(building);
+  buildings.push(building);
+}
+for (let i = 0; i < 10; i++) createBuilding(-i*50 - 50);
+
+// ==============================
+// Carro do jogador (detalhado)
+// ==============================
+const car = new THREE.Group();
+
+const body = new THREE.Mesh(
+  new THREE.BoxGeometry(2.4, 0.6, 4.2),
+  new THREE.MeshPhongMaterial({ color: 0x3366cc, flatShading: true })
+);
+body.position.y = 0.6;
+car.add(body);
+
+const hood = new THREE.Mesh(
+  new THREE.BoxGeometry(2.2, 0.4, 1.2),
+  new THREE.MeshPhongMaterial({ color: 0x3366cc })
+);
+hood.position.set(0, 0.55, -1.8);
+car.add(hood);
+
+const trunk = new THREE.Mesh(
+  new THREE.BoxGeometry(2.2, 0.4, 1.2),
+  new THREE.MeshPhongMaterial({ color: 0x3366cc })
+);
+trunk.position.set(0, 0.55, 1.8);
+car.add(trunk);
+
+const cabin = new THREE.Mesh(
+  new THREE.BoxGeometry(1.8, 0.8, 2.2),
+  new THREE.MeshPhongMaterial({ color: 0x111111, transparent: true, opacity: 0.75 })
+);
+cabin.position.set(0, 1.0, 0);
+car.add(cabin);
+
+// Faróis dianteiros
+function addHeadlight(x, z) {
+  const light = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.15, 0.15, 0.1, 12),
+    new THREE.MeshPhongMaterial({ color: 0xffffcc, emissive: 0xffff33 })
+  );
+  light.rotation.x = Math.PI / 2;
+  light.position.set(x, 0.65, z);
+  car.add(light);
+}
+addHeadlight(-0.7, -2.1);
+addHeadlight(0.7, -2.1);
+
+// Lanternas traseiras
+function addTaillight(x, z) {
+  const light = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.15, 0.15, 0.1, 12),
+    new THREE.MeshPhongMaterial({ color: 0xff2222, emissive: 0xaa0000 })
+  );
+  light.rotation.x = Math.PI / 2;
+  light.position.set(x, 0.65, z);
+  car.add(light);
+}
+addTaillight(-0.7, 2.1);
+addTaillight(0.7, 2.1);
+
+// Rodas
+const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16);
+function addWheel(x, z) {
+  const tire = new THREE.Mesh(wheelGeo, new THREE.MeshPhongMaterial({ color: 0x111111 }));
+  tire.rotation.z = Math.PI / 2;
+  tire.position.set(x, 0.25, z);
+  car.add(tire);
+}
+addWheel(-1.2, 1.7); addWheel(1.2, 1.7);
+addWheel(-1.2, -1.7); addWheel(1.2, -1.7);
+
+car.position.set(0, 0, 5);
+scene.add(car);
+
+// ==============================
+// NPC Cars
+// ==============================
+let obstacles = [];
+function createNpcCar() {
+  const npc = new THREE.Group();
+  const colors = [0xffffff, 0xffeeee, 0xffffcc, 0xddddff, 0xccffcc, 0xffccff, 0xe6f7ff];
+  const npcColor = colors[Math.floor(Math.random() * colors.length)];
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(2.2, 0.6, 4),
+    new THREE.MeshPhongMaterial({ color: npcColor, flatShading: true })
+  );
+  body.position.y = 0.6;
+  npc.add(body);
+
+  const cabin = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 0.7, 2),
+    new THREE.MeshPhongMaterial({ color: 0x333333, transparent: true, opacity: 0.7 })
+  );
+  cabin.position.set(0, 1.0, 0);
+  npc.add(cabin);
+
+  npc.position.set((Math.random()-0.5) * roadWidth * 0.7, 0, -120);
+
+  scene.add(npc);
+  obstacles.push(npc);
+}
+
+// Controles
+let left = false, right = false;
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") left = true;
+  if (e.key === "ArrowRight") right = true;
+});
+document.addEventListener("keyup", e => {
+  if (e.key === "ArrowLeft") left = false;
+  if (e.key === "ArrowRight") right = false;
+});
+
+// Jogo
+let speed = 0.4;
+let points = 0;
+let velX = 0;
+let gameOver = false;
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (gameOver) return;
+
+  // Movimento lateral
+  if (left) velX -= 0.05;
+  if (right) velX += 0.05;
+  velX *= 0.92;
+  car.position.x += velX;
+
+  if (car.position.x < -roadWidth/2+1.5) car.position.x = -roadWidth/2+1.5;
+  if (car.position.x > roadWidth/2-1.5) car.position.x = roadWidth/2-1.5;
+
+  // Estrada infinita
+  road.position.z += speed*2;
+  if (road.position.z > 0) road.position.z = -100;
+
+  // Movimento faixas
+  stripes.forEach(s => {
+    s.position.z += speed * 2;
+    if (s.position.z > 10) s.position.z = -200;
+  });
+
+  // Movimento postes
+  lamps.forEach(p => {
+    p.position.z += speed*2.5;
+    if (p.position.z > 10) p.position.z = -200;
+  });
+
+  // Movimento prédios
+  buildings.forEach(b => {
+    b.position.z += speed*0.6;
+    if (b.position.z > 20) {
+      b.position.z = -300 - Math.random()*100;
+      const side = Math.random() < 0.5 ? -1 : 1;
+      b.position.x = side * (roadWidth/2 + 10 + Math.random()*15);
+    }
+  });
+
+  // Sol e céu
+  sun.position.y -= 0.002;
+  if (sun.position.y > 25) sky.material.color.set(0x87ceeb);
+  else if (sun.position.y > 10) sky.material.color.set(0xff9966);
+  else if (sun.position.y > 0) sky.material.color.set(0x110022);
+  else {
+    sun.position.y = 40;
+    sky.material.color.set(0x87ceeb);
+  }
+
+  // NPC Cars
+  if (Math.random() < 0.015) createNpcCar();
+  obstacles.forEach(o => { o.position.z += speed*2; });
+  obstacles = obstacles.filter(o => {
+    if (o.position.z > 6) {
+      scene.remove(o);
+      points++;
+      document.getElementById("score").innerText = "Pontos: " + points;
+      return false;
+    }
+    return true;
+  });
+
+  // Colisão
+  const carBox = new THREE.Box3().setFromObject(car);
+  obstacles.forEach(o => {
+    const npcBox = new THREE.Box3().setFromObject(o);
+    if (carBox.intersectsBox(npcBox)) {
+      speed = 0;
+      gameOver = true;
+      scoreHistory.push(points);
+      document.getElementById("gameOverScreen").style.display = "flex";
+      document.getElementById("finalScore").innerText = "Pontuação: " + points;
+    }
+  });
+
+  // Velocidade
+  speed += 0.0001;
+  if (speed > 1.5) speed = 1.5;
+
+  // Câmera
+  camera.position.set(car.position.x, 4, car.position.z+8);
+  camera.lookAt(car.position.x, 0, car.position.z-5);
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// Resize
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Funções globais
+function restartGame() { window.location.reload(); }
+function showScores() {
+  const historyDiv = document.getElementById("scoreHistory");
+  historyDiv.innerHTML = "<strong>Histórico:</strong><br>" + scoreHistory.join("<br>");
+  historyDiv.style.display = "block";
+}
