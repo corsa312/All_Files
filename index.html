@@ -59,14 +59,14 @@
     .folder h3 .arrow { display: inline-block; margin-right: 6px; transition: transform 0.3s ease; }
     ul { list-style: none; padding: 0; margin: 8px 0 0; overflow: hidden; max-height: 0; transition: max-height 0.4s ease; }
     ul.open { max-height: 2000px; }
-    li { margin: 6px 0; padding: 6px; border-radius: 6px; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
+    li { margin: 6px 0; padding: 6px; border-radius: 6px; transition: background 0.2s; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     li:hover { background: #f5f0fa; }
     .btn { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; text-decoration: none; font-weight: 500; transition: background 0.2s; }
     .btn-code { background: #6f42c1; color: white; }
     .btn-code:hover { background: #5936a2; }
     .btn-test { background: #28a745; color: white; }
     .btn-test:hover { background: #1c7c31; }
-    small { color: #666; font-size: 0.85rem; }
+    small { color: #666; font-size: 0.8rem; }
     footer {
       text-align: center;
       padding: 20px;
@@ -84,6 +84,23 @@
       padding: 0 16px;
     }
     .filters label { font-size: 0.9rem; cursor: pointer; }
+    .extra-links {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    .extra-links a {
+      display: inline-block;
+      margin-right: 12px;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #0366d6;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .extra-links a:hover { background: #024c9c; }
   </style>
 </head>
 <body>
@@ -105,6 +122,11 @@
   <div class="meta">Repositório: <a id="repoLink" href="#" target="_blank"></a></div>
   <div id="status" class="meta"></div>
 
+  <div class="extra-links">
+    <a href="https://snack.expo.dev/@corsa55/financeiro" target="_blank">React Financeiro</a>
+    <a href="https://snack.expo.dev/@corsa55/lanche" target="_blank">React Lanchonete</a>
+  </div>
+
   <div class="list" id="filesList"></div>
 
   <script>
@@ -122,6 +144,7 @@
     const filtersEl = document.getElementById('filters');
 
     let selectedExts = new Set();
+    let rootData = null;
 
     async function loadTree() {
       statusEl.textContent = '⏳ Carregando lista de arquivos...';
@@ -134,9 +157,8 @@
         const data = await res.json();
         const tree = data.tree || [];
 
-        const root = buildHierarchy(tree);
+        rootData = buildHierarchy(tree);
 
-        // gera lista de extensões
         const extensions = [...new Set(tree
           .filter(item => item.type === 'blob')
           .map(item => {
@@ -145,7 +167,6 @@
           })
         )].sort();
 
-        // botão selecionar/deselecionar tudo
         const toggleBtn = document.createElement('button');
         toggleBtn.textContent = 'Desmarcar tudo';
         let allSelected = true;
@@ -157,11 +178,10 @@
             if(allSelected) selectedExts.add(chk.value);
           });
           toggleBtn.textContent = allSelected ? 'Desmarcar tudo' : 'Selecionar tudo';
-          renderAll(root);
+          renderAll();
         });
         filtersEl.appendChild(toggleBtn);
 
-        // checkboxes
         extensions.forEach(ext => {
           const label = document.createElement('label');
           const checkbox = document.createElement('input');
@@ -175,23 +195,24 @@
             } else {
               selectedExts.delete(ext);
             }
-            renderAll(root);
+            renderAll();
           });
           label.appendChild(checkbox);
           label.appendChild(document.createTextNode(' ' + ext));
           filtersEl.appendChild(label);
         });
 
-        statusEl.textContent = `✅ Arquivos encontrados: ${tree.length}`;
-        renderAll(root);
+        renderAll();
       } catch (err) {
         statusEl.textContent = '❌ Falha: ' + err.message;
       }
     }
 
-    function renderAll(root) {
+    function renderAll() {
       filesList.innerHTML = '';
-      renderFolder(root, filesList);
+      let visibleCount = renderFolder(rootData, filesList);
+      let totalCount = countFiles(rootData);
+      statusEl.textContent = `✅ Total de arquivos: ${totalCount} | Visíveis: ${visibleCount}`;
     }
 
     function buildHierarchy(tree) {
@@ -217,6 +238,7 @@
     function renderFolder(node, container) {
       const search = searchInput.value.trim().toLowerCase();
       const keys = Object.keys(node.children).sort((a, b) => a.localeCompare(b));
+      let count = 0;
       const ul = document.createElement('ul');
       ul.classList.add('open');
 
@@ -242,17 +264,18 @@
             arrow.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0)';
           });
 
-          renderFolder(child, subUl);
+          count += renderFolder(child, subUl);
         } else if (child.type === 'file') {
           if (search && !child.name.toLowerCase().includes(search) && !child.path.toLowerCase().includes(search)) return;
           const ext = child.name.includes('.') ? '.' + child.name.split('.').pop().toLowerCase() : '(sem extensão)';
           if (!selectedExts.has(ext)) return;
 
           const li = document.createElement('li');
-          li.textContent = child.name;
+          const sizeText = formatSize(child.size);
+          li.innerHTML = `${child.name} <small>(${sizeText})</small>`;
 
           const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${child.path}`;
-          const testUrl = `https://htmlpreview.github.io/?https://github.com/${owner}/${repo}/blob/${branch}/${child.path}`;
+          const testUrl = `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${child.path}`;
 
           const btnCode = document.createElement('a');
           btnCode.href = rawUrl;
@@ -271,14 +294,34 @@
           }
 
           ul.appendChild(li);
+          count++;
         }
       });
 
       container.appendChild(ul);
+      return count;
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      let kb = bytes / 1024;
+      if (kb < 1024) return kb.toFixed(1) + " KB";
+      let mb = kb / 1024;
+      return mb.toFixed(1) + " MB";
+    }
+
+    function countFiles(node) {
+      let count = 0;
+      for (let key in node.children) {
+        let child = node.children[key];
+        if (child.type === 'file') count++;
+        else count += countFiles(child);
+      }
+      return count;
     }
 
     refreshBtn.addEventListener('click', loadTree);
-    searchInput.addEventListener('input', () => loadTree());
+    searchInput.addEventListener('input', () => renderAll());
     loadTree();
   </script>
 
