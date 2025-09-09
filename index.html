@@ -24,12 +24,13 @@
     h1 {font-size: 1.5rem; margin: 0;}
     .controls {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       margin: 20px auto;
       max-width: 900px;
       padding: 0 16px;
     }
-    input[type=text], select, button {
+    input[type=text], button {
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
@@ -57,7 +58,7 @@
     .folder h3 { margin: 0; font-size: 1.1rem; color: #6f42c1; display: flex; align-items: center; cursor: pointer; }
     .folder h3 .arrow { display: inline-block; margin-right: 6px; transition: transform 0.3s ease; }
     ul { list-style: none; padding: 0; margin: 8px 0 0; overflow: hidden; max-height: 0; transition: max-height 0.4s ease; }
-    ul.open { max-height: 1000px; }
+    ul.open { max-height: 2000px; }
     li { margin: 6px 0; padding: 6px; border-radius: 6px; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
     li:hover { background: #f5f0fa; }
     .btn { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; text-decoration: none; font-weight: 500; transition: background 0.2s; }
@@ -74,6 +75,15 @@
       margin-top: 40px;
       font-size: 0.85rem;
     }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 10px auto;
+      max-width: 900px;
+      padding: 0 16px;
+    }
+    .filters label { font-size: 0.9rem; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -89,6 +99,8 @@
     <input id="search" type="text" placeholder="🔍 Pesquisar por nome/extensão..." />
     <button id="refresh">⟳ Atualizar</button>
   </div>
+
+  <div class="filters" id="filters"></div>
 
   <div class="meta">Repositório: <a id="repoLink" href="#" target="_blank"></a></div>
   <div id="status" class="meta"></div>
@@ -107,108 +119,166 @@
     const filesList = document.getElementById('filesList');
     const searchInput = document.getElementById('search');
     const refreshBtn = document.getElementById('refresh');
+    const filtersEl = document.getElementById('filters');
+
+    let selectedExts = new Set();
 
     async function loadTree() {
       statusEl.textContent = '⏳ Carregando lista de arquivos...';
       filesList.innerHTML = '';
+      filtersEl.innerHTML = '';
       try {
         const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
         const res = await fetch(apiUrl);
         if(!res.ok) throw new Error('Erro ao acessar a API do GitHub: ' + res.status);
         const data = await res.json();
         const tree = data.tree || [];
+
+        const root = buildHierarchy(tree);
+
+        // gera lista de extensões
+        const extensions = [...new Set(tree
+          .filter(item => item.type === 'blob')
+          .map(item => {
+            const parts = item.path.split('.');
+            return parts.length > 1 ? '.' + parts.pop().toLowerCase() : '(sem extensão)';
+          })
+        )].sort();
+
+        // botão selecionar/deselecionar tudo
+        const toggleBtn = document.createElement('button');
+        toggleBtn.textContent = 'Desmarcar tudo';
+        let allSelected = true;
+        toggleBtn.addEventListener('click', () => {
+          allSelected = !allSelected;
+          selectedExts.clear();
+          filtersEl.querySelectorAll('input[type=checkbox]').forEach(chk => {
+            chk.checked = allSelected;
+            if(allSelected) selectedExts.add(chk.value);
+          });
+          toggleBtn.textContent = allSelected ? 'Desmarcar tudo' : 'Selecionar tudo';
+          renderAll(root);
+        });
+        filtersEl.appendChild(toggleBtn);
+
+        // checkboxes
+        extensions.forEach(ext => {
+          const label = document.createElement('label');
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = ext;
+          checkbox.checked = true;
+          selectedExts.add(ext);
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+              selectedExts.add(ext);
+            } else {
+              selectedExts.delete(ext);
+            }
+            renderAll(root);
+          });
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(' ' + ext));
+          filtersEl.appendChild(label);
+        });
+
         statusEl.textContent = `✅ Arquivos encontrados: ${tree.length}`;
-        renderTree(tree);
+        renderAll(root);
       } catch (err) {
         statusEl.textContent = '❌ Falha: ' + err.message;
       }
     }
 
-    function renderTree(tree) {
-      const folders = {};
+    function renderAll(root) {
+      filesList.innerHTML = '';
+      renderFolder(root, filesList);
+    }
+
+    function buildHierarchy(tree) {
+      const root = { type: 'folder', name: '', children: {} };
       tree.forEach(item => {
         if (item.type !== 'blob') return;
         const parts = item.path.split('/');
-        const filename = parts.pop();
-        const folder = parts.length ? parts.join('/') : '/';
-        if (!folders[folder]) folders[folder] = [];
-        folders[folder].push({ path: item.path, filename, size: item.size });
-      });
-
-      const search = searchInput.value.trim().toLowerCase();
-
-      const folderKeys = Object.keys(folders).sort((a,b)=> a.localeCompare(b));
-      if(folderKeys.length === 0){ filesList.innerHTML = '<div class="meta">Nenhum arquivo encontrado.</div>'; return }
-
-      folderKeys.forEach(folder => {
-        const matches = folders[folder].filter(f => {
-          if (!search) return true;
-          return f.filename.toLowerCase().includes(search) || f.path.toLowerCase().includes(search);
+        let current = root;
+        parts.forEach((part, i) => {
+          if (i === parts.length - 1) {
+            current.children[part] = { type: 'file', name: part, path: item.path, size: item.size };
+          } else {
+            if (!current.children[part]) {
+              current.children[part] = { type: 'folder', name: part, children: {} };
+            }
+            current = current.children[part];
+          }
         });
-        if(matches.length === 0) return;
+      });
+      return root;
+    }
 
-        const folderDiv = document.createElement('div');
-        folderDiv.className = 'folder';
+    function renderFolder(node, container) {
+      const search = searchInput.value.trim().toLowerCase();
+      const keys = Object.keys(node.children).sort((a, b) => a.localeCompare(b));
+      const ul = document.createElement('ul');
+      ul.classList.add('open');
 
-        const h = document.createElement('h3');
-        const arrow = document.createElement('span');
-        arrow.textContent = '▶';
-        arrow.className = 'arrow';
-        h.appendChild(arrow);
-        h.appendChild(document.createTextNode(folder === '/' ? '📂 Raiz' : '📁 ' + folder));
-        folderDiv.appendChild(h);
+      keys.forEach(key => {
+        const child = node.children[key];
+        if (child.type === 'folder') {
+          const folderDiv = document.createElement('div');
+          folderDiv.className = 'folder';
+          const h = document.createElement('h3');
+          const arrow = document.createElement('span');
+          arrow.textContent = '▶';
+          arrow.className = 'arrow';
+          h.appendChild(arrow);
+          h.appendChild(document.createTextNode('📁 ' + child.name));
+          folderDiv.appendChild(h);
 
-        const ul = document.createElement('ul');
-        matches.sort((a,b)=> a.filename.localeCompare(b.filename));
-        matches.forEach(f => {
+          const subUl = document.createElement('ul');
+          folderDiv.appendChild(subUl);
+          container.appendChild(folderDiv);
+
+          h.addEventListener('click', () => {
+            const isOpen = subUl.classList.toggle('open');
+            arrow.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0)';
+          });
+
+          renderFolder(child, subUl);
+        } else if (child.type === 'file') {
+          if (search && !child.name.toLowerCase().includes(search) && !child.path.toLowerCase().includes(search)) return;
+          const ext = child.name.includes('.') ? '.' + child.name.split('.').pop().toLowerCase() : '(sem extensão)';
+          if (!selectedExts.has(ext)) return;
+
           const li = document.createElement('li');
+          li.textContent = child.name;
 
-          const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${f.path}`;
-          const testUrl = `https://htmlpreview.github.io/?https://github.com/${owner}/${repo}/blob/${branch}/${f.path}`;
+          const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${child.path}`;
+          const testUrl = `https://htmlpreview.github.io/?https://github.com/${owner}/${repo}/blob/${branch}/${child.path}`;
 
-          if(f.filename.toLowerCase().endsWith('.html')){
-            const btnCode = document.createElement('a');
-            btnCode.href = rawUrl;
-            btnCode.target = '_blank';
-            btnCode.className = 'btn btn-code';
-            btnCode.textContent = 'Ver código';
+          const btnCode = document.createElement('a');
+          btnCode.href = rawUrl;
+          btnCode.target = '_blank';
+          btnCode.className = 'btn btn-code';
+          btnCode.textContent = 'Ver código';
+          li.appendChild(btnCode);
 
+          if (child.name.toLowerCase().endsWith('.html')) {
             const btnTest = document.createElement('a');
             btnTest.href = testUrl;
             btnTest.target = '_blank';
             btnTest.className = 'btn btn-test';
             btnTest.textContent = '▶ Testar';
-
-            li.appendChild(document.createTextNode(f.filename));
-            li.appendChild(btnCode);
             li.appendChild(btnTest);
-          } else {
-            const btnCode = document.createElement('a');
-            btnCode.href = rawUrl;
-            btnCode.target = '_blank';
-            btnCode.className = 'btn btn-code';
-            btnCode.textContent = 'Ver código';
-
-            li.appendChild(document.createTextNode(f.filename));
-            li.appendChild(btnCode);
           }
 
           ul.appendChild(li);
-        });
-
-        folderDiv.appendChild(ul);
-        filesList.appendChild(folderDiv);
-
-        h.addEventListener('click', ()=>{
-          const isOpen = ul.classList.toggle('open');
-          arrow.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0)';
-        });
+        }
       });
+
+      container.appendChild(ul);
     }
 
     refreshBtn.addEventListener('click', loadTree);
     searchInput.addEventListener('input', () => loadTree());
-
     loadTree();
   </script>
 
