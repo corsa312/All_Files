@@ -35,7 +35,7 @@ road.rotation.x = -Math.PI / 2;
 road.position.z = -100;
 scene.add(road);
 
-// Acostamento
+// Acostamentos
 function createSidewalk(x) {
   const geo = new THREE.PlaneGeometry(15, 400);
   const mat = new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide });
@@ -113,7 +113,7 @@ function createBuilding(z) {
 for (let i = 0; i < 10; i++) createBuilding(-i*50 - 50);
 
 // ==============================
-// Carro do jogador
+// Carro do jogador (detalhado)
 // ==============================
 const car = new THREE.Group();
 
@@ -145,6 +145,7 @@ const cabin = new THREE.Mesh(
 cabin.position.set(0, 1.0, 0);
 car.add(cabin);
 
+// Faróis dianteiros
 function addHeadlight(x, z) {
   const light = new THREE.Mesh(
     new THREE.CylinderGeometry(0.15, 0.15, 0.1, 12),
@@ -157,6 +158,7 @@ function addHeadlight(x, z) {
 addHeadlight(-0.7, -2.1);
 addHeadlight(0.7, -2.1);
 
+// Lanternas traseiras
 function addTaillight(x, z) {
   const light = new THREE.Mesh(
     new THREE.CylinderGeometry(0.15, 0.15, 0.1, 12),
@@ -169,6 +171,7 @@ function addTaillight(x, z) {
 addTaillight(-0.7, 2.1);
 addTaillight(0.7, 2.1);
 
+// Rodas
 const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16);
 function addWheel(x, z) {
   const tire = new THREE.Mesh(wheelGeo, new THREE.MeshPhongMaterial({ color: 0x111111 }));
@@ -188,8 +191,8 @@ scene.add(car);
 let obstacles = [];
 function createNpcCar() {
   const npc = new THREE.Group();
-  const lightColors = [0xffffff, 0xffeeee, 0xffffcc, 0xddddff, 0xccffcc, 0xffccff, 0xe6f7ff];
-  const npcColor = lightColors[Math.floor(Math.random() * lightColors.length)];
+  const colors = [0xffffff, 0xffeeee, 0xffffcc, 0xddddff, 0xccffcc, 0xffccff, 0xe6f7ff];
+  const npcColor = colors[Math.floor(Math.random() * colors.length)];
 
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(2.2, 0.6, 4),
@@ -204,28 +207,6 @@ function createNpcCar() {
   );
   cabin.position.set(0, 1.0, 0);
   npc.add(cabin);
-
-  function addNpcHeadlight(x, z) {
-    const light = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.12, 0.12, 0.1, 12),
-      new THREE.MeshPhongMaterial({ color: 0xffffcc, emissive: 0xffff66 })
-    );
-    light.rotation.x = Math.PI / 2;
-    light.position.set(x, 0.65, 2.0);
-    npc.add(light);
-  }
-  addNpcHeadlight(-0.6, 2);
-  addNpcHeadlight(0.6, 2);
-
-  const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.35, 16);
-  function addWheel(x, z) {
-    const tire = new THREE.Mesh(wheelGeo, new THREE.MeshPhongMaterial({ color: 0x111111 }));
-    tire.rotation.z = Math.PI / 2;
-    tire.position.set(x, 0.25, z);
-    npc.add(tire);
-  }
-  addWheel(-1.1, 1.5); addWheel(1.1, 1.5);
-  addWheel(-1.1, -1.5); addWheel(1.1, -1.5);
 
   npc.position.set((Math.random()-0.5) * roadWidth * 0.7, 0, -120);
 
@@ -254,14 +235,11 @@ function animate() {
   requestAnimationFrame(animate);
   if (gameOver) return;
 
-  // Movimento lateral (mais ágil + inclinação)
+  // Movimento lateral
   if (left) velX -= 0.05;
   if (right) velX += 0.05;
   velX *= 0.92;
   car.position.x += velX;
-
-  // Inclinação do carro
-  car.rotation.z = -velX * 0.4;
 
   if (car.position.x < -roadWidth/2+1.5) car.position.x = -roadWidth/2+1.5;
   if (car.position.x > roadWidth/2-1.5) car.position.x = roadWidth/2-1.5;
@@ -270,7 +248,7 @@ function animate() {
   road.position.z += speed*2;
   if (road.position.z > 0) road.position.z = -100;
 
-  // Movimento das faixas
+  // Movimento faixas
   stripes.forEach(s => {
     s.position.z += speed * 2;
     if (s.position.z > 10) s.position.z = -200;
@@ -347,7 +325,7 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Funções de interface
+// Funções globais
 function restartGame() { window.location.reload(); }
 function showScores() {
   const historyDiv = document.getElementById("scoreHistory");
