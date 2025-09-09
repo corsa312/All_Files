@@ -275,7 +275,7 @@
           li.innerHTML = `${child.name} <small>(${sizeText})</small>`;
 
           const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${child.path}`;
-          const testUrl = `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${child.path}`;
+          const testUrl = `https://raw.githack.com/${owner}/${repo}/${branch}/${child.path}`;
 
           const btnCode = document.createElement('a');
           btnCode.href = rawUrl;
