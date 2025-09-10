@@ -115,6 +115,7 @@
   <div class="controls">
     <input id="search" type="text" placeholder="🔍 Pesquisar por nome/extensão..." />
     <button id="refresh">⟳ Atualizar</button>
+    <button id="toggleView">📂 Modo: Pastas</button>
   </div>
 
   <div class="filters" id="filters"></div>
@@ -144,9 +145,11 @@
     const searchInput = document.getElementById('search');
     const refreshBtn = document.getElementById('refresh');
     const filtersEl = document.getElementById('filters');
+    const toggleBtn = document.getElementById('toggleView');
 
     let selectedExts = new Set();
     let rootData = null;
+    let viewMode = "folders"; // "folders" ou "categories"
 
     async function loadTree() {
       statusEl.textContent = '⏳ Carregando lista de arquivos...';
@@ -169,20 +172,20 @@
           })
         )].sort();
 
-        const toggleBtn = document.createElement('button');
-        toggleBtn.textContent = 'Desmarcar tudo';
+        const selectAllBtn = document.createElement('button');
+        selectAllBtn.textContent = 'Desmarcar tudo';
         let allSelected = true;
-        toggleBtn.addEventListener('click', () => {
+        selectAllBtn.addEventListener('click', () => {
           allSelected = !allSelected;
           selectedExts.clear();
           filtersEl.querySelectorAll('input[type=checkbox]').forEach(chk => {
             chk.checked = allSelected;
             if(allSelected) selectedExts.add(chk.value);
           });
-          toggleBtn.textContent = allSelected ? 'Desmarcar tudo' : 'Selecionar tudo';
+          selectAllBtn.textContent = allSelected ? 'Desmarcar tudo' : 'Selecionar tudo';
           renderAll();
         });
-        filtersEl.appendChild(toggleBtn);
+        filtersEl.appendChild(selectAllBtn);
 
         extensions.forEach(ext => {
           const label = document.createElement('label');
@@ -211,10 +214,14 @@
     }
 
     function renderAll() {
-      filesList.innerHTML = '';
-      let visibleCount = renderFolder(rootData, filesList);
-      let totalCount = countFiles(rootData);
-      statusEl.textContent = `✅ Total de arquivos: ${totalCount} | Visíveis: ${visibleCount}`;
+      if (viewMode === "folders") {
+        filesList.innerHTML = '';
+        let visibleCount = renderFolder(rootData, filesList);
+        let totalCount = countFiles(rootData);
+        statusEl.textContent = `✅ Total de arquivos: ${totalCount} | Visíveis: ${visibleCount}`;
+      } else {
+        renderCategories(rootData);
+      }
     }
 
     function buildHierarchy(tree) {
@@ -304,6 +311,114 @@
       return count;
     }
 
+    function categorizeFiles(node) {
+      const categories = {
+        "HTML": [".html", ".htm"],
+        "CSS": [".css"],
+        "JavaScript": [".js", ".jsx", ".ts", ".tsx"],
+        "JSON": [".json"],
+        "Imagens": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp"],
+        "Markdown": [".md"],
+        "Texto": [".txt", ".rtf"],
+        "Outros": []
+      };
+
+      const result = {};
+      Object.keys(categories).forEach(cat => result[cat] = []);
+
+      function walk(node) {
+        for (let key in node.children) {
+          let child = node.children[key];
+          if (child.type === "file") {
+            const ext = child.name.includes(".") 
+              ? "." + child.name.split(".").pop().toLowerCase()
+              : "(sem extensão)";
+            let placed = false;
+            for (let cat in categories) {
+              if (categories[cat].includes(ext)) {
+                result[cat].push(child);
+                placed = true;
+                break;
+              }
+            }
+            if (!placed) result["Outros"].push(child);
+          } else {
+            walk(child);
+          }
+        }
+      }
+      walk(node);
+      return result;
+    }
+
+    function renderCategories(root) {
+      filesList.innerHTML = "";
+      const categorized = categorizeFiles(root);
+      const search = searchInput.value.trim().toLowerCase();
+      let total = 0;
+
+      for (let cat in categorized) {
+        const list = categorized[cat].filter(file => {
+          if (search && !file.name.toLowerCase().includes(search) && !file.path.toLowerCase().includes(search)) return false;
+          const ext = file.name.includes('.') ? '.' + file.name.split('.').pop().toLowerCase() : '(sem extensão)';
+          return selectedExts.has(ext);
+        });
+
+        if (list.length === 0) continue;
+
+        const div = document.createElement("div");
+        div.className = "folder";
+
+        const h = document.createElement("h3");
+        const arrow = document.createElement("span");
+        arrow.textContent = "▶";
+        arrow.className = "arrow";
+        h.appendChild(arrow);
+        h.appendChild(document.createTextNode("📂 " + cat));
+        div.appendChild(h);
+
+        const ul = document.createElement("ul");
+        div.appendChild(ul);
+
+        h.addEventListener("click", () => {
+          const isOpen = ul.classList.toggle("open");
+          arrow.style.transform = isOpen ? "rotate(90deg)" : "rotate(0)";
+        });
+
+        list.forEach(file => {
+          const li = document.createElement("li");
+          const sizeText = formatSize(file.size);
+          li.innerHTML = `${file.name} <small>(${sizeText})</small>`;
+
+          const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${file.path}`;
+          const testUrl = `https://raw.githack.com/${owner}/${repo}/${branch}/${file.path}`;
+
+          const btnCode = document.createElement("a");
+          btnCode.href = rawUrl;
+          btnCode.target = "_blank";
+          btnCode.className = "btn btn-code";
+          btnCode.textContent = "Ver código";
+          li.appendChild(btnCode);
+
+          if (file.name.toLowerCase().endsWith(".html")) {
+            const btnTest = document.createElement("a");
+            btnTest.href = testUrl;
+            btnTest.target = "_blank";
+            btnTest.className = "btn btn-test";
+            btnTest.textContent = "▶ Testar";
+            li.appendChild(btnTest);
+          }
+
+          ul.appendChild(li);
+          total++;
+        });
+
+        filesList.appendChild(div);
+      }
+
+      statusEl.textContent = `✅ Total de arquivos: ${countFiles(root)} | Visíveis: ${total}`;
+    }
+
     function formatSize(bytes) {
       if (bytes < 1024) return bytes + " B";
       let kb = bytes / 1024;
@@ -324,6 +439,12 @@
 
     refreshBtn.addEventListener('click', loadTree);
     searchInput.addEventListener('input', () => renderAll());
+    toggleBtn.addEventListener('click', () => {
+      viewMode = viewMode === "folders" ? "categories" : "folders";
+      toggleBtn.textContent = viewMode === "folders" ? "📂 Modo: Pastas" : "📑 Modo: Categorias";
+      renderAll();
+    });
+
     loadTree();
   </script>
 
