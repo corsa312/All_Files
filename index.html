@@ -313,14 +313,15 @@
 
     function categorizeFiles(node) {
       const categories = {
-        "HTML": [".html", ".htm"],
-        "CSS": [".css"],
-        "JavaScript": [".js", ".jsx", ".ts", ".tsx"],
-        "JSON": [".json"],
-        "Imagens": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp"],
-        "Markdown": [".md"],
-        "Texto": [".txt", ".rtf"],
-        "Outros": []
+        "🌐 HTML": [".html", ".htm"],
+        "🎨 CSS": [".css"],
+        "⚡ JavaScript/TypeScript": [".js", ".jsx", ".ts", ".tsx"],
+        "📦 JSON": [".json"],
+        "🐍 Python": [".py"],
+        "🖼️ Imagens": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp"],
+        "📝 Markdown": [".md"],
+        "📄 Texto": [".txt", ".rtf"],
+        "📂 Outros": []
       };
 
       const result = {};
@@ -341,7 +342,7 @@
                 break;
               }
             }
-            if (!placed) result["Outros"].push(child);
+            if (!placed) result["📂 Outros"].push(child);
           } else {
             walk(child);
           }
@@ -374,7 +375,7 @@
         arrow.textContent = "▶";
         arrow.className = "arrow";
         h.appendChild(arrow);
-        h.appendChild(document.createTextNode("📂 " + cat));
+        h.appendChild(document.createTextNode(" " + cat));
         div.appendChild(h);
 
         const ul = document.createElement("ul");
