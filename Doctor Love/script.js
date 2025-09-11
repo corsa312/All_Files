@@ -113,7 +113,7 @@ function createBuilding(z) {
 for (let i = 0; i < 10; i++) createBuilding(-i*50 - 50);
 
 // ==============================
-// Carro do jogador (detalhado)
+// Carro do jogador
 // ==============================
 const car = new THREE.Group();
 
@@ -214,9 +214,30 @@ function createNpcCar() {
   obstacles.push(npc);
 }
 
-// Controles
+// ==============================
+// Áudios
+// ==============================
+const engineSound = new Audio("car-engine.mp3");
+engineSound.loop = true;
+engineSound.volume = 0.6;
+
+const hornSound = new Audio("car-horn.mp3");
+hornSound.volume = 0.6;
+
+const crashSound = new Audio("car-crash.mp3");
+crashSound.volume = 0.8;
+
+// ==============================
+// Controles (ajustado com áudio)
+// ==============================
 let left = false, right = false;
 document.addEventListener("keydown", e => {
+  // inicia o motor na primeira interação
+  if (!engineSound.playing) {
+    engineSound.play().catch(err => console.log("Erro ao tocar motor:", err));
+    engineSound.playing = true;
+  }
+
   if (e.key === "ArrowLeft") left = true;
   if (e.key === "ArrowRight") right = true;
 });
@@ -225,7 +246,9 @@ document.addEventListener("keyup", e => {
   if (e.key === "ArrowRight") right = false;
 });
 
+// ==============================
 // Jogo
+// ==============================
 let speed = 0.4;
 let points = 0;
 let velX = 0;
@@ -290,6 +313,12 @@ function animate() {
       document.getElementById("score").innerText = "Pontos: " + points;
       return false;
     }
+
+    // Chance de buzina quando o player está perto
+    if (Math.abs(o.position.z - car.position.z) < 15 && Math.random() < 0.01) {
+      hornSound.cloneNode().play();
+    }
+
     return true;
   });
 
@@ -300,6 +329,8 @@ function animate() {
     if (carBox.intersectsBox(npcBox)) {
       speed = 0;
       gameOver = true;
+      crashSound.play();
+      engineSound.pause();
       scoreHistory.push(points);
       document.getElementById("gameOverScreen").style.display = "flex";
       document.getElementById("finalScore").innerText = "Pontuação: " + points;
