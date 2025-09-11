@@ -13,6 +13,33 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5,10,5);
 scene.add(light);
 
+// === ÁUDIO com HTML5 Audio ===
+const motorSound = new Audio("motor.mp3"); 
+motorSound.loop = true;
+motorSound.volume = 0.6;
+
+const crashSound = new Audio("batida.mp3");
+crashSound.volume = 0.8;
+
+const slipSound = new Audio("derrapagem.mp3");
+slipSound.volume = 0.9;
+
+// cada NPC buzina com uma nova instância
+function playHorn() {
+  const horn = new Audio("buzina.mp3");
+  horn.volume = 0.2;
+  horn.play();
+}
+
+// desbloquear áudio após interação do usuário
+function initSounds() {
+  if (motorSound.paused) motorSound.play();
+  document.removeEventListener("click", initSounds);
+  document.removeEventListener("keydown", initSounds);
+}
+document.addEventListener("click", initSounds);
+document.addEventListener("keydown", initSounds);
+
 // chão (grama mais escura)
 const groundGeo = new THREE.PlaneGeometry(200, 500);
 const groundMat = new THREE.MeshStandardMaterial({color: 0x1d5e1f});
@@ -252,11 +279,24 @@ function animate(){
          Math.abs(carGroup.position.z - obstacles[i].position.z) < 1.5){
         if (obstacles[i].userData.type==="oil"){
           slipTimer=60;
+          slipSound.currentTime = 0;
+          slipSound.play();
           scene.remove(obstacles[i]);
           obstacles.splice(i,1); i--;
         } else {
+          crashSound.currentTime = 0;
+          crashSound.play();
           alert("💥 Bateu! Fim de jogo");
           window.location.reload();
+        }
+      } else if (obstacles[i].userData.type==="car") {
+        // se o jogador passa perto do NPC, chance de buzinar
+        let distX = Math.abs(carGroup.position.x - obstacles[i].position.x);
+        let distZ = Math.abs(carGroup.position.z - obstacles[i].position.z);
+        if (distX < 2 && distZ < 5) {
+          if (Math.random() < 0.5) {
+            playHorn();
+          }
         }
       }
     }
