@@ -157,13 +157,13 @@
       filtersEl.innerHTML = '';
       try {
         const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
-        const token = "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"; // <-- coloque seu token aqui
+        const token = "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"; // seu token aqui
         const res = await fetch(apiUrl, {
           headers: {
-            Authorization: `token ${token}`
+            Authorization: `token ${token}`,
+            Accept: "application/vnd.github.v3+json"
           }
         });
-
         if(!res.ok) throw new Error('Erro ao acessar a API do GitHub: ' + res.status);
         const data = await res.json();
         const tree = data.tree || [];
