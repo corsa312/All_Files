@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo da Memória - Trânsito Seguro</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    background: linear-gradient(180deg, #a8dadc, #f1faee);
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    background-color: #1d3557;
+    color: white;
+    padding: 20px 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  h1 {
+    font-size: 28px;
+    margin: 0;
+  }
+
+  p {
+    margin-top: 5px;
+    color: #f1faee;
+  }
+
+  #info {
+    margin: 15px;
+    font-size: 18px;
+    color: #1d3557;
+  }
+
+  #game-board {
+    display: grid;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px auto;
+    perspective: 1000px;
+  }
+
+  .card {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+  }
+
+  .card.flip {
+    transform: rotateY(180deg);
+  }
+
+  .card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+  }
+
+  .card-front {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: rotateY(180deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-front img {
+    width: 70%;
+    height: 70%;
+  }
+
+  .card-back {
+    background-color: #457b9d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 30px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  #message {
+    margin: 15px;
+    font-size: 20px;
+    color: #1d3557;
+    font-weight: bold;
+  }
+
+  .btn {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: white;
+  }
+
+  #next-level {
+    display: none;
+    background-color: #e63946;
+  }
+
+  #restart {
+    background-color: #2a9d8f;
+  }
+
+  #next-level:hover {
+    background-color: #ff4d6d;
+  }
+
+  #restart:hover {
+    background-color: #3cbba8;
+  }
+
+  footer {
+    background-color: #1d3557;
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛑 Trânsito Seguro 🛑</h1>
+  <p>Aprenda os sinais de trânsito brincando!</p>
+</header>
+
+<div id="info">🚗 Fase 1 - Encontre todos os pares!</div>
+<div id="game-board"></div>
+<p id="message"></p>
+
+<!-- Botões de controle -->
+<div>
+  <button id="next-level" class="btn">Próxima Fase 🚦</button>
+  <button id="restart" class="btn">🔁 Recomeçar</button>
+</div>
+
+<footer>
+  © 2025 - Aprendendo com Diversão | Tema: Educação no Trânsito
+</footer>
+
+<script>
+const levels = [
+  {
+    pairs: 3,
+    images: [
+      "https://flashplacas.com.br/wp-content/uploads/2023/10/placa-parada-obrigatoria-R-1.webp",
+      "https://isinaliza.vtexassets.com/arquivos/ids/169230/3548-placa-vire-a-esquerda-r-25a-aluminio-acm-50x50cm-1.jpg?v=636800596025370000",
+      "https://dcdn-us.mitiendanube.com/stores/275/783/products/a24a1-2a8108a4ce4ba9730f16806373278930-480-0.webp"
+    ]
+  },
+  {
+    pairs: 4,
+    images: [
+      "https://flashplacas.com.br/wp-content/uploads/2023/10/placa-parada-obrigatoria-R-1.webp",
+      "https://isinaliza.vtexassets.com/arquivos/ids/169230/3548-placa-vire-a-esquerda-r-25a-aluminio-acm-50x50cm-1.jpg?v=636800596025370000",
+      "https://dcdn-us.mitiendanube.com/stores/275/783/products/a24a1-2a8108a4ce4ba9730f16806373278930-480-0.webp",
+      "https://acdn-us.mitiendanube.com/stores/003/521/592/products/a141-4197a8a9a1c6f5b49c16945356098677-640-0.webp"
+    ]
+  },
+  {
+    pairs: 5,
+    images: [
+      "https://flashplacas.com.br/wp-content/uploads/2023/10/placa-parada-obrigatoria-R-1.webp",
+      "https://isinaliza.vtexassets.com/arquivos/ids/169230/3548-placa-vire-a-esquerda-r-25a-aluminio-acm-50x50cm-1.jpg?v=636800596025370000",
+      "https://dcdn-us.mitiendanube.com/stores/275/783/products/a24a1-2a8108a4ce4ba9730f16806373278930-480-0.webp",
+      "https://acdn-us.mitiendanube.com/stores/003/521/592/products/a141-4197a8a9a1c6f5b49c16945356098677-640-0.webp",
+      "https://flashplacas.com/wp-content/uploads/2020/05/placa-duplo-sentido-R-28.png"
+    ]
+  }
+];
+
+let level = 0;
+let firstCard = null;
+let lockBoard = false;
+const board = document.getElementById("game-board");
+const info = document.getElementById("info");
+const message = document.getElementById("message");
+const nextBtn = document.getElementById("next-level");
+const restartBtn = document.getElementById("restart");
+
+function startLevel() {
+  board.innerHTML = "";
+  message.textContent = "";
+  info.textContent = `🚗 Fase ${level + 1} - Encontre todos os pares!`;
+  nextBtn.style.display = "none";
+
+  const { pairs, images } = levels[level];
+  const cards = [...images.slice(0, pairs), ...images.slice(0, pairs)];
+  cards.sort(() => Math.random() - 0.5);
+
+  const gridSize = Math.ceil(Math.sqrt(cards.length));
+  board.style.gridTemplateColumns = `repeat(${gridSize}, 100px)`;
+
+  cards.forEach(imgSrc => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+
+    const cardFront = document.createElement("div");
+    cardFront.classList.add("card-front");
+    const img = document.createElement("img");
+    img.src = imgSrc;
+    cardFront.appendChild(img);
+
+    const cardBack = document.createElement("div");
+    cardBack.classList.add("card-back");
+    cardBack.textContent = "🚦";
+
+    card.appendChild(cardFront);
+    card.appendChild(cardBack);
+
+    card.addEventListener("click", () => flipCard(card));
+    board.appendChild(card);
+  });
+}
+
+function flipCard(card) {
+  if (lockBoard || card.classList.contains("flip")) return;
+  card.classList.add("flip");
+
+  if (!firstCard) {
+    firstCard = card;
+    return;
+  }
+
+  checkMatch(card);
+}
+
+function checkMatch(secondCard) {
+  const firstImg = firstCard.querySelector(".card-front img").src;
+  const secondImg = secondCard.querySelector(".card-front img").src;
+
+  if (firstImg === secondImg) {
+    firstCard = null;
+    setTimeout(() => {
+      if (document.querySelectorAll(".flip").length === levels[level].pairs * 2) {
+        message.textContent = "🎉 Muito bem! Você completou esta fase!";
+        nextBtn.style.display = "inline-block";
+      }
+    }, 500);
+  } else {
+    lockBoard = true;
+    setTimeout(() => {
+      firstCard.classList.remove("flip");
+      secondCard.classList.remove("flip");
+      firstCard = null;
+      lockBoard = false;
+    }, 1000);
+  }
+}
+
+// Avançar de fase
+nextBtn.addEventListener("click", () => {
+  level++;
+  if (level < levels.length) {
+    startLevel();
+  } else {
+    message.textContent = "🏁 Parabéns! Você completou todas as fases e aprendeu sobre o trânsito!";
+    nextBtn.style.display = "none";
+    info.textContent = "Fim do jogo 🚗👏";
+  }
+});
+
+// Recomeçar o jogo
+restartBtn.addEventListener("click", () => {
+  level = 0;
+  startLevel();
+});
+
+startLevel();
+</script>
+</body>
+</html>
