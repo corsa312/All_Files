@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Acervo do Colecionador</title>
+
+<style>
+/* ======= ESTILO GERAL ======= */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #2563eb;
+  padding: 20px;
+  text-align: center;
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* ======= CONTAINER PRINCIPAL ======= */
+.container {
+  max-width: 900px;
+  margin: 30px auto;
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+form {
+  display: grid;
+  gap: 15px;
+}
+
+/* ======= CAMPOS ======= */
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #334155;
+  color: #fff;
+  font-size: 1em;
+  transition: 0.3s;
+  box-sizing: border-box;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid #3b82f6;
+}
+
+/* ======= SELECT CORRIGIDO ======= */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #334155;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 1em;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white'><polygon points='0,0 16,0 8,8'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+
+select:hover {
+  background-color: #475569;
+}
+
+option {
+  background-color: #1e293b;
+  color: #fff;
+  padding: 10px;
+}
+
+/* ======= BOTÃO ======= */
+button {
+  padding: 12px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #1e40af;
+}
+
+/* ======= LISTA DE ITENS ======= */
+.item-list {
+  margin-top: 30px;
+}
+
+.search-bar {
+  margin-bottom: 20px;
+  padding: 10px;
+  background: #334155;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  width: 100%;
+  font-size: 1em;
+}
+
+/* ======= CARTÕES ======= */
+.item-card {
+  display: flex;
+  align-items: center;
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  gap: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.item-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info h3 {
+  margin: 0;
+  color: #60a5fa;
+}
+
+.delete-btn {
+  background: #dc2626;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}
+
+/* ======= RESPONSIVO ======= */
+@media (max-width: 700px) {
+  .item-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .item-card img {
+    width: 100%;
+    height: auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>📚 Acervo do Colecionador</header>
+
+<div class="container">
+  <form id="itemForm">
+    <input type="text" id="nome" placeholder="Nome do item" required />
+    <select id="categoria" required>
+      <option value="">Selecione a categoria</option>
+      <option>Livro</option>
+      <option>Revista</option>
+      <option>Carro</option>
+      <option>Artigo Antigo</option>
+      <option>Outros</option>
+    </select>
+    <input type="number" id="ano" placeholder="Ano de fabricação ou aquisição" />
+    <textarea id="descricao" placeholder="Descrição, observações, condição..."></textarea>
+    <input type="file" id="imagem" accept="image/*" />
+    <button type="submit">Adicionar ao Acervo</button>
+  </form>
+
+  <div class="item-list">
+    <input type="text" class="search-bar" id="search" placeholder="🔍 Buscar item..." />
+    <div id="listaItens"></div>
+  </div>
+</div>
+
+<script>
+const form = document.getElementById("itemForm");
+const listaItens = document.getElementById("listaItens");
+const search = document.getElementById("search");
+
+let acervo = JSON.parse(localStorage.getItem("acervo")) || [];
+
+/* ======= SALVAR ======= */
+function salvar() {
+  localStorage.setItem("acervo", JSON.stringify(acervo));
+}
+
+/* ======= RENDERIZAR ======= */
+function renderizarLista(filtro = "") {
+  listaItens.innerHTML = "";
+  acervo
+    .filter(item => item.nome.toLowerCase().includes(filtro.toLowerCase()))
+    .forEach((item, index) => {
+      const card = document.createElement("div");
+      card.className = "item-card";
+      card.innerHTML = `
+        <img src="${item.imagem || 'https://via.placeholder.com/100x100?text=Sem+Imagem'}" alt="Imagem do item" />
+        <div class="item-info">
+          <h3>${item.nome}</h3>
+          <p><strong>Categoria:</strong> ${item.categoria}</p>
+          ${item.ano ? `<p><strong>Ano:</strong> ${item.ano}</p>` : ""}
+          <p>${item.descricao || ""}</p>
+        </div>
+        <button class="delete-btn" onclick="removerItem(${index})">Excluir</button>
+      `;
+      listaItens.appendChild(card);
+    });
+}
+
+/* ======= REMOVER ======= */
+function removerItem(index) {
+  if (confirm("Tem certeza que deseja excluir este item?")) {
+    acervo.splice(index, 1);
+    salvar();
+    renderizarLista(search.value);
+  }
+}
+
+/* ======= ADICIONAR ======= */
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nome = document.getElementById("nome").value;
+  const categoria = document.getElementById("categoria").value;
+  const ano = document.getElementById("ano").value;
+  const descricao = document.getElementById("descricao").value;
+  const imagemInput = document.getElementById("imagem");
+
+  const novoItem = { nome, categoria, ano, descricao };
+
+  if (imagemInput.files && imagemInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      novoItem.imagem = e.target.result;
+      acervo.push(novoItem);
+      salvar();
+      renderizarLista();
+      form.reset();
+    };
+    reader.readAsDataURL(imagemInput.files[0]);
+  } else {
+    novoItem.imagem = null;
+    acervo.push(novoItem);
+    salvar();
+    renderizarLista();
+    form.reset();
+  }
+});
+
+/* ======= BUSCA ======= */
+search.addEventListener("input", (e) => {
+  renderizarLista(e.target.value);
+});
+
+/* ======= INICIAR ======= */
+renderizarLista();
+</script>
+</body>
+</html>
